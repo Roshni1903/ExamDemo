@@ -1,5 +1,5 @@
 import React from "react";
-import Login from "./component/Login";
+import Login from "./component/Login/Login";
 import Register from "./component/Register";
 import DashBoard from "./component/Dashboard";
 import {
@@ -9,7 +9,7 @@ import {
   Route,
 } from "react-router-dom";
 import { RouterProvider } from "react-router-dom";
-import Navbar from "./component/NavBar";
+import Navbar from "./component/Navbar/NavBar";
 export default function App() {
   // const router = createBrowserRouter([
   //   {

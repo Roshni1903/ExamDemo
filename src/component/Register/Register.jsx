@@ -3,11 +3,9 @@ import styles from "./register.module.css";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { updateData, setError, clearData } from "../Redux/RegisterSlice";
+import { emailRegex, passRegex } from "../regex";
 import instance from "./axiosInstance";
 export default function Register() {
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  const passRegex =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const data = useSelector((state) => state.register.data);

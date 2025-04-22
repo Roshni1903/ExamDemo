@@ -2,7 +2,7 @@ import React from "react";
 import styles from "./login.module.css";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { updateData } from "../Redux/LoginSlice";
+import { updateData } from "../../Redux/LoginSlice";
 export default function Login() {
   const dispatch = useDispatch();
   const data = useSelector((state) => state.login.data);
