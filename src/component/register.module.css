@@ -1,7 +1,7 @@
+
 .flex{
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;  
   }
   .inner{
@@ -16,13 +16,12 @@
       border-radius: 5px;
   
   }
-  /* .btn{
-    height: 120px;
-    width: 120px;
-    background-color: rgb(94, 180, 94);
-    padding:10px;
+  .btn{
+    background-color: navy;
+    padding:10px 18px;
     border-radius: 5px;
     border: none;
     margin: 10px auto;
+    color:white;
  
- } */
+ }

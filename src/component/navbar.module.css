@@ -1,0 +1,15 @@
+.navbar{
+    display: flex;
+    width:100vw;
+    background-color: navy;
+    height:60px;
+    gap:10px;
+    align-items: center;
+    justify-content: flex-end;
+
+}
+.link{
+    color:white;
+    text-decoration: none;
+    font-size: 18px;
+}

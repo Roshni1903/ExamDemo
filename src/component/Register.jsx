@@ -1,12 +1,17 @@
 import React from "react";
 import styles from "./register.module.css";
 import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { updateData, setError, clearData } from "../Redux/RegisterSlice";
+import instance from "./axiosInstance";
 export default function Register() {
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   const passRegex =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const data = useSelector((state) => state.register.data);
+  const error = useSelector((state) => state.register.error);
   const validate = (name, value) => {
     const error = {};
     switch (name) {
@@ -47,10 +52,17 @@ export default function Register() {
     }
     return error;
   };
-  const dispatch = useDispatch();
-  const data = useSelector((state) => state.register.data);
-  const error = useSelector((state) => state.register.error);
-
+  const submitData = async (data) => {
+    try {
+      await instance({
+        url: "SignUp",
+        method: "POST",
+        data,
+      }).then((response) => console.log(response));
+    } catch (e) {
+      console.log(e);
+    }
+  };
   const handleChange = (e) => {
     const { name, value } = e.target;
     dispatch(updateData({ name: name, value: value }));
@@ -70,6 +82,7 @@ export default function Register() {
     if (hasError) {
       e.preventDefault();
     } else {
+      submitData(data);
       dispatch(clearData());
     }
   };
