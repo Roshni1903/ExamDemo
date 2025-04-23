@@ -2,9 +2,10 @@ import React from "react";
 import styles from "./register.module.css";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { updateData, setError, clearData } from "../Redux/RegisterSlice";
-import { emailRegex, passRegex } from "../regex";
-import instance from "./axiosInstance";
+import { updateData, setError, clearData } from "/src/Redux/RegisterSlice.jsx";
+import { emailRegex, passRegex } from "../../regex";
+import { ToastContainer, toast } from "react-toastify";
+import instance from "/src/component/axiosInstance.jsx";
 export default function Register() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -53,14 +54,24 @@ export default function Register() {
   const submitData = async (data) => {
     try {
       await instance({
-        url: "SignUp",
+        url: "users/SignUp",
         method: "POST",
         data,
-      }).then((response) => console.log(response));
+      }).then((response) => {
+        if (response.data.message == "Email already exist") {
+          toast.error("email already exists,enter other email", {
+            position: "top-center",
+            autoClose: 1000,
+          });
+        } else {
+          navigate("/");
+        }
+      });
     } catch (e) {
       console.log(e);
     }
   };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     dispatch(updateData({ name: name, value: value }));
@@ -86,6 +97,8 @@ export default function Register() {
   };
   return (
     <div className={styles.flex}>
+      <ToastContainer />
+
       <h1>Register Here</h1>
       <form className={styles.inner} onSubmit={(e) => handleSubmit(e)}>
         <label htmlFor="name">Name</label>
@@ -137,3 +150,5 @@ const ErrorContainer = ({ error }) => {
     return null;
   }
 };
+
+//desc,form container logic and ui container

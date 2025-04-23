@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import styles from "/src/component/navbar.module.css";
+import styles from "/src/component/NavBar/navbar.module.css";
 
 const Navbar = () => {
   return (
@@ -8,7 +8,6 @@ const Navbar = () => {
       <Link className={styles.link} to="/">
         Login
       </Link>
-
       <Link className={styles.link} to="/register">
         Register
       </Link>

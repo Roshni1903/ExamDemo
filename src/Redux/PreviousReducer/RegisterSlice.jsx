@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+
 const initialState = {
   data: {
     name: "",
@@ -6,11 +7,12 @@ const initialState = {
     password: "",
     role: "",
   },
+
   error: {
-    nameError: "",
-    emailError: "",
-    passwordError: "",
-    roleErorr: "",
+    name: "",
+    email: "",
+    password: "",
+    role: "",
   },
 };
 const RegisterSlice = createSlice({
@@ -31,9 +33,9 @@ const RegisterSlice = createSlice({
     },
     clearData: (state) => {
       state.data = {
+        password: "",
         name: "",
         email: "",
-        password: "",
         role: "",
       };
     },

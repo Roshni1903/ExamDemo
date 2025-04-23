@@ -1,41 +1,31 @@
 import React from "react";
-import Login from "./component/Login/Login";
-import Register from "./component/Register";
 import DashBoard from "./component/Dashboard";
-import {
-  BrowserRouter,
-  createBrowserRouter,
-  Routes,
-  Route,
-} from "react-router-dom";
-import { RouterProvider } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from "./component/Navbar/NavBar";
+import RegisterUi from "/src/Presentation/registration/RegisterUi.jsx";
+import registerDesc from "/src/Description/registerDesc.js";
+import LoginUi from "./Presentation/login/LoginUi";
+import loginDesc from "/src/Description/loginDesc.js";
+import ForgetPassword from "./component/Forget-Password/ForgetPassword";
 export default function App() {
-  // const router = createBrowserRouter([
-  //   {
-  //     element: <Login />,
-  //     path: "/",
-  //   },
-  //   {
-  //     element: <Register />,
-  //     path: "/register",
-  //   },
-  //   {
-  //     element: <DashBoard />,
-  //     path: "/dashboard",
-  //   },
-  // ]);
-
   return (
     <>
-      <BrowserRouter>
+      <BrowserRouter
+        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+      >
         <Navbar />
+
         <Routes>
-          <Route path="/" element={<Login />}></Route>
-          <Route path="/register" element={<Register />}></Route>
+          <Route path="/" element={<LoginUi desc={loginDesc} />}></Route>
+          <Route
+            path="/register"
+            element={<RegisterUi desc={registerDesc} />}
+          ></Route>
+          <Route path="/forget-password" element={<ForgetPassword />}></Route>
+
+          <Route path="/dashboard" element={<DashBoard />}></Route>
         </Routes>
       </BrowserRouter>
-      {/* <RouterProvider router={router} /> */}
     </>
   );
 }
