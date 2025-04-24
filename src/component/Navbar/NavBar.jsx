@@ -6,10 +6,11 @@ const Navbar = () => {
   return (
     <div className={styles.navbar}>
       <Link className={styles.link} to="/">
-        Login
+        <button className={styles.btn}>Login </button>
       </Link>
+
       <Link className={styles.link} to="/register">
-        Register
+        <button className={styles.btn}> Register </button>
       </Link>
     </div>
   );

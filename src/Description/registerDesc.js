@@ -1,6 +1,6 @@
 import { emailRegex, passRegex } from "../component/regex";
 
-const FormDescription = [
+const registerDesc = [
   {
     label: "Name",
     name: "name",
@@ -36,6 +36,7 @@ const FormDescription = [
       },
     ],
   },
+
   {
     label: "role",
     name: "role",
@@ -61,4 +62,4 @@ const FormDescription = [
     ],
   },
 ];
-export default FormDescription;
+export default registerDesc;

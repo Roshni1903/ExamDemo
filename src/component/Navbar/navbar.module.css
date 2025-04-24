@@ -8,8 +8,13 @@
     justify-content: flex-end;
 
 }
-.link{
+.btn{
+    background-color: #EB455F;
     color:white;
     text-decoration: none;
-    font-size: 18px;
+   font-size: 17px;
+    border:none;
+    padding:8px 15px;
+    border-radius:5px;
 }
+

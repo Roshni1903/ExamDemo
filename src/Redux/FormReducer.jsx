@@ -1,32 +1,59 @@
 import { createSlice } from "@reduxjs/toolkit";
-const initialState = {
-  login: {
-    data: {
-      email: "",
-      password: "",
-    },
-    error: {
-      email: "",
-      password: "",
-    },
-  },
-  register: {
-    data: {
-      name: "",
-      email: "",
-      password: "",
-      role: "",
-    },
+import registerDesc from "../Description/registerDesc";
+import loginDesc from "../Description/loginDesc";
+// console.log(registerDesc);
+// console.log(loginDesc);
 
-    error: {
-      name: "",
-      email: "",
-      password: "",
-      role: "",
-    },
-  },
+const forms = {
+  register: registerDesc,
+  login: loginDesc,
+};
+// const initialState = {
+//   login: {
+//     data: {
+//       email: "",
+//       password: "",
+//     },
+//     error: {
+//       email: "",
+//       password: "",
+//     },
+//   },
+//   register: {
+//     data: {
+//       name: "",
+//       email: "",
+//       password: "",
+//       role: "",
+//     },
+
+//     error: {
+//       name: "",
+//       email: "",
+//       password: "",
+//       role: "",
+//     },
+//   },
+// };
+
+const getForm = (forms) => {
+  const initialstate = {};
+
+  Object.entries(forms).map(([form, formfields]) => {
+    const data = {};
+    const error = {};
+    Object.entries(formfields).forEach(([key, value]) => {
+      data[value.name] = "";
+    });
+    Object.entries(formfields).forEach(([key, value]) => {
+      error[value.name] = "";
+    });
+    initialstate[form] = { data, error };
+  });
+  return initialstate;
 };
 
+const initialState = getForm(forms);
 const FormReducer = createSlice({
   name: "formReducer",
   initialState,
