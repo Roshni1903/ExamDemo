@@ -6,7 +6,10 @@ import RegisterUi from "/src/Presentation/registration/RegisterUi.jsx";
 import registerDesc from "/src/Description/registerDesc.js";
 import LoginUi from "./Presentation/login/LoginUi";
 import loginDesc from "/src/Description/loginDesc.js";
-import ForgetPassword from "./component/Forget-Password/ForgetPassword";
+import ForgetDesc from "./Description/ForgetDesc";
+import ForgetPasswordUi from "./Presentation/ForgetPassword/ForgetPasswordUi";
+import ResetPasswordUi from "./Presentation/ResetPassword/ResetPasswordUi";
+import resetPassDesc from "./Description/ResetPassDesc";
 export default function App() {
   return (
     <>
@@ -21,7 +24,14 @@ export default function App() {
             path="/register"
             element={<RegisterUi desc={registerDesc} />}
           ></Route>
-          <Route path="/forget-password" element={<ForgetPassword />}></Route>
+          <Route
+            path="/forget-password"
+            element={<ForgetPasswordUi desc={ForgetDesc} />}
+          ></Route>
+          <Route
+            path="/newPassword"
+            element={<ResetPasswordUi desc={resetPassDesc} />}
+          ></Route>
 
           <Route path="/dashboard" element={<DashBoard />}></Route>
         </Routes>

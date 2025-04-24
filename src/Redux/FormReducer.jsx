@@ -1,12 +1,16 @@
 import { createSlice } from "@reduxjs/toolkit";
 import registerDesc from "../Description/registerDesc";
 import loginDesc from "../Description/loginDesc";
+import ForgetDesc from "../Description/ForgetDesc";
+import resetPassDesc from "../Description/ResetPassDesc";
 // console.log(registerDesc);
 // console.log(loginDesc);
 
 const forms = {
   register: registerDesc,
   login: loginDesc,
+  forget: ForgetDesc,
+  reset: resetPassDesc,
 };
 // const initialState = {
 //   login: {
@@ -54,6 +58,7 @@ const getForm = (forms) => {
 };
 
 const initialState = getForm(forms);
+
 const FormReducer = createSlice({
   name: "formReducer",
   initialState,
@@ -72,12 +77,9 @@ const FormReducer = createSlice({
     },
 
     clearData: (state, action) => {
-      state[action.payload.type].data = {
-        name: "",
-        email: "",
-        password: "",
-        role: "",
-      };
+      Object.entries(state[action.payload.type].data).forEach(([key]) => {
+        state[action.payload.type].data[key] = "";
+      });
     },
   },
 });

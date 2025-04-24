@@ -1,5 +1,5 @@
 import React from "react";
-const switchUi = (element, data, error, handleChange) => {
+const FormUi = (element, data, error, handleChange) => {
   switch (element.type) {
     case "email": {
       return (
@@ -74,7 +74,6 @@ const switchUi = (element, data, error, handleChange) => {
     }
   }
 };
-
 const ErrorContainer = ({ error }) => {
   if (error) {
     return <span style={{ color: "red" }}>{error}</span>;
@@ -82,4 +81,4 @@ const ErrorContainer = ({ error }) => {
     return null;
   }
 };
-export default switchUi;
+export default FormUi;

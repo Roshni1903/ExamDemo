@@ -1,17 +1,24 @@
 import React from "react";
-import Login from "../../Container/Login";
+import Login from "../../Container/PreviousContainer/Login";
 import styles from "/src/Presentation/login/login.module.css";
 import { Link } from "react-router-dom";
-import switchUi from "../../Container/switchUi";
+import loginDesc from "../../Description/loginDesc";
+import commonContainer from "../../Container/commonContainer";
+import FormUi from "../FormUi";
+import { ToastContainer } from "react-toastify";
 export default function LoginUi({ desc }) {
-  const { data, error, handleChange, handleSubmit } = Login();
+  const { data, error, handleChange, handleSubmit } = commonContainer(
+    "login",
+    loginDesc
+  );
 
   return (
     <div className={styles.flex}>
+      <ToastContainer />
       <h1>Login</h1>
       <form onSubmit={(e) => handleSubmit(e)} className={styles.inner}>
         {desc.map((element) => {
-          return switchUi(element, data, error, handleChange, handleSubmit);
+          return FormUi(element, data, error, handleChange, handleSubmit);
         })}
         <button type="submit" className={styles.btn}>
           Login
