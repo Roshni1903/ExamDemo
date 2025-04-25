@@ -1,16 +1,12 @@
 import React from "react";
-import Login from "../../Container/PreviousContainer/Login";
+import Login from "../../Container/login";
 import styles from "/src/Presentation/login/login.module.css";
 import { Link } from "react-router-dom";
-import loginDesc from "../../Description/loginDesc";
-import commonContainer from "../../Container/commonContainer";
 import FormUi from "../FormUi";
 import { ToastContainer } from "react-toastify";
 export default function LoginUi({ desc }) {
-  const { data, error, handleChange, handleSubmit } = commonContainer(
-    "login",
-    loginDesc
-  );
+  const { loading, data, error, handleChange, validate, handleSubmit } =
+    Login();
 
   return (
     <div className={styles.flex}>
@@ -20,12 +16,12 @@ export default function LoginUi({ desc }) {
         {desc.map((element) => {
           return FormUi(element, data, error, handleChange, handleSubmit);
         })}
-        <button type="submit" className={styles.btn}>
-          Login
+        <button type="submit" className={loading ? styles.disable : styles.btn}>
+          {loading ? "loading..." : "Login"}
         </button>
         <div className="links">
           <p>
-            <Link to="/forget-password">forget password</Link>
+            <Link to="/forget-password-link">forget password</Link>
           </p>
           <p>
             Need an account?<Link to="/register">signup</Link>

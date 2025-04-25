@@ -36,3 +36,13 @@
     /* width:100%; */
     
   }
+  .disable{
+    background-color: rgba(0, 0, 128, 0.456);
+ 
+    padding:10px 18px;
+    border-radius: 5px;
+    border: none;
+    margin: 10px auto;
+    color:white;
+ 
+  }

@@ -1,5 +1,5 @@
 import React from "react";
-import DashBoard from "./component/Dashboard";
+
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from "./component/Navbar/NavBar";
 import RegisterUi from "/src/Presentation/registration/RegisterUi.jsx";
@@ -8,8 +8,12 @@ import LoginUi from "./Presentation/login/LoginUi";
 import loginDesc from "/src/Description/loginDesc.js";
 import ForgetDesc from "./Description/ForgetDesc";
 import ForgetPasswordUi from "./Presentation/ForgetPassword/ForgetPasswordUi";
-import ResetPasswordUi from "./Presentation/ResetPassword/ResetPasswordUi";
-import resetPassDesc from "./Description/ResetPassDesc";
+import newPassDesc from "./Description/newPassDesc";
+import NewPasswordUi from "./Presentation/ResetPassword/NewPasswordUi";
+import ProtectedRoute from "./component/ProtectedRoute";
+import AdminDashboard from "./component/Teacher/AdminDashboard";
+import StudentDashboard from "./component/Student/StudentDashboard";
+import Profile from "./component/CommonUser/Profile";
 export default function App() {
   return (
     <>
@@ -25,15 +29,24 @@ export default function App() {
             element={<RegisterUi desc={registerDesc} />}
           ></Route>
           <Route
-            path="/forget-password"
+            path="/forget-password-link"
             element={<ForgetPasswordUi desc={ForgetDesc} />}
           ></Route>
           <Route
             path="/newPassword"
-            element={<ResetPasswordUi desc={resetPassDesc} />}
+            element={<NewPasswordUi desc={newPassDesc} />}
           ></Route>
-
-          <Route path="/dashboard" element={<DashBoard />}></Route>
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
+                <StudentDashboard />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="/dashboard/profile" element={<Profile />}></Route>
+          </Route>
         </Routes>
       </BrowserRouter>
     </>

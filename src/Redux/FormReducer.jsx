@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import registerDesc from "../Description/registerDesc";
 import loginDesc from "../Description/loginDesc";
 import ForgetDesc from "../Description/ForgetDesc";
-import resetPassDesc from "../Description/ResetPassDesc";
+import newPassDesc from "../Description/newPassDesc";
 // console.log(registerDesc);
 // console.log(loginDesc);
 
@@ -10,7 +10,7 @@ const forms = {
   register: registerDesc,
   login: loginDesc,
   forget: ForgetDesc,
-  reset: resetPassDesc,
+  newPass: newPassDesc,
 };
 // const initialState = {
 //   login: {
@@ -56,7 +56,6 @@ const getForm = (forms) => {
   });
   return initialstate;
 };
-
 const initialState = getForm(forms);
 
 const FormReducer = createSlice({
@@ -83,5 +82,6 @@ const FormReducer = createSlice({
     },
   },
 });
-export const { updateData, setError, clearData } = FormReducer.actions;
+export const { updateData, setError, clearData, setLoading } =
+  FormReducer.actions;
 export default FormReducer.reducer;

@@ -1,14 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
 import styles from "./password.module.css";
 import FormUi from "../FormUi";
-import ForgetDesc from "../../Description/ForgetDesc";
-import commonContainer from "../../Container/commonContainer";
+import Forget from "../../Container/Forget";
 import { ToastContainer } from "react-toastify";
 export default function ForgetPasswordUi({ desc }) {
-  const { data, error, handleChange, handleSubmit } = commonContainer(
-    "forget",
-    ForgetDesc
-  );
+  const { loading, data, error, handleChange, handleSubmit } = Forget();
+
   return (
     <div className={styles.flex}>
       <ToastContainer />
@@ -18,13 +15,13 @@ export default function ForgetPasswordUi({ desc }) {
           return FormUi(element, data, error, handleChange);
         })}
         <button
-          className={styles.btn}
+          type="submit"
           onClick={(e) => {
             handleSubmit(e);
           }}
-          type="submit"
+          className={loading ? styles.disable : styles.btn}
         >
-          send mail
+          {loading ? "sending mail..." : "send mail"}
         </button>
       </form>
     </div>

@@ -1,29 +1,26 @@
 import React, { useState } from "react";
-import styles from "./resetPass.module.css";
+import styles from "./newPass.module.css";
 import FormUi from "../FormUi";
-import commonContainer from "../../Container/commonContainer";
-import resetPassDesc from "../../Description/ResetPassDesc";
-export default function ResetPasswordUi({ desc }) {
-  const { data, error, handleChange, handleSubmit } = commonContainer(
-    "reset",
-    resetPassDesc
-  );
-
+import { ToastContainer } from "react-toastify";
+import NewPass from "../../Container/NewPass";
+export default function NewPasswordUi({ desc }) {
+  const { loading, data, error, handleChange, handleSubmit } = NewPass();
   return (
     <div className={styles.flex}>
+      <ToastContainer />
       <h1>set new password</h1>
       <form className={styles.inner}>
         {desc.map((element) => {
           return FormUi(element, data, error, handleChange);
         })}
         <button
-          className={styles.btn}
+          type="submit"
           onClick={(e) => {
             handleSubmit(e);
           }}
-          type="submit"
+          className={loading ? styles.disable : styles.btn}
         >
-          Reset Password
+          {loading ? "processing..." : "set password"}
         </button>
       </form>
     </div>

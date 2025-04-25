@@ -61,7 +61,11 @@ const FormUi = (element, data, error, handleChange) => {
           <b>
             <label>{element.label}</label>
           </b>
-          <select name={element.name} onChange={(e) => handleChange(e)}>
+          <select
+            name={element.name}
+            value={data[element.name]}
+            onChange={(e) => handleChange(e)}
+          >
             {Object.entries(element.optionValue).map(([_, param]) => (
               <option value={param.value}>{param.label}</option>
             ))}
