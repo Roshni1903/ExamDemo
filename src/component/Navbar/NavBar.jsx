@@ -1,41 +1,50 @@
-import React from "react";
-import { Link, Navigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import styles from "/src/component/NavBar/navbar.module.css";
-import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
-  const navigate = useNavigate();
+  const [token, setToken] = useState(null);
+  const location = useLocation();
+  const role = localStorage.getItem("role");
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    if (storedToken) {
+      setToken(storedToken);
+    }
+  }, [location]);
+
   const handleLogout = () => {
     localStorage.clear();
-    navigate("/");
+    setToken(null);
   };
-
-  const token = localStorage.getItem("token");
   return (
     <div className={styles.navbar}>
-      {token ? null : (
-        <>
-          <Link className={styles.link} to="/">
-            <button className={styles.btn}>Login </button>
-          </Link>
-          <Link className={styles.link} to="/register">
-            <button className={styles.btn}> Register </button>
-          </Link>
-        </>
-      )}
-
-      {token ? (
-        <>
-          <Link className={styles.link} to="/">
-            <button onClick={handleLogout} className={styles.btn}>
-              Logout
-            </button>
-          </Link>
-          <Link className={styles.link} to="/dashboard/profile">
-            <button className={styles.btn}>Profile</button>
-          </Link>
-        </>
-      ) : null}
+      <div className={styles.navbtn}>
+        {token ? (
+          <>
+            {role === "teacher" ? (
+              <Link className={styles.link} to="/create-exam">
+                <button className={styles.btn}> Create+ </button>
+              </Link>
+            ) : null}
+            <Link className={styles.link} to="/">
+              <button onClick={handleLogout} className={styles.btn}>
+                Logout{" "}
+              </button>
+            </Link>
+          </>
+        ) : (
+          <>
+            <Link className={styles.link} to="/">
+              <button className={styles.btn}>Login </button>
+            </Link>
+            <Link className={styles.link} to="/register">
+              <button className={styles.btn}> Register </button>
+            </Link>
+          </>
+        )}
+      </div>
     </div>
   );
 };

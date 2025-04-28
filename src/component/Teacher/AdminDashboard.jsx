@@ -1,9 +1,30 @@
-import React from "react";
-
+import React, { useEffect } from "react";
+import instance from "../axiosInstance";
 export default function AdminDashboard() {
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        console.log(token);
+        const response = await instance.get("dashboard/Teachers/viewExam", {
+          headers: {
+            "access-token": token,
+          },
+        });
+        console.log(response.data);
+      } catch (e) {
+        console.log(e);
+      }
+    };
+
+    if (token) {
+      fetchData();
+    }
+  }, []);
   return (
     <>
-      <h1>admin</h1>
+      <h1>Admin</h1>
     </>
   );
 }

@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./loading.module.css";
-function LoadingSpinner() {
-  return <div className={styles.loading}></div>;
+
+export default function LoadingSpinner() {
+  return <span className={styles.loader}></span>;
 }
-export default LoadingSpinner;
