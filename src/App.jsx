@@ -14,7 +14,7 @@ import DashBoard from "./component/CommonUser/Dashboard";
 import { useLocation } from "react-router-dom";
 import Profile from "./component/CommonUser/Profile";
 import CreateExam from "./component/Teacher/CreateExam/CreateExam";
-
+import EditExam from "./component/Teacher/EditExam/EditExam";
 export default function App() {
   const location = useLocation();
   const role = localStorage.getItem("role");
@@ -47,6 +47,8 @@ export default function App() {
             </ProtectedRoute>
           }
         ></Route>
+        <Route path="/edit-exam/:id" element={<EditExam />}></Route>
+
         <Route path="*" element={<Navigate to="/404" />}></Route>
         <Route path="/404" element={<h1>Page not found!</h1>} />
         <Route path="/dashboard/profile" element={<Profile />}></Route>

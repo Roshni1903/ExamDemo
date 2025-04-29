@@ -1,239 +1,338 @@
 import React, { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
+import instance from "../../axiosInstance";
 import styles from "./createExam.module.css";
 export default function CreateExam() {
-  const addEmptyQues = [
-    {
-      question: "",
-      answer: "",
-      options: ["", "", "", ""],
-    },
-  ];
+  const createEmptyQuestion = () => ({
+    question: "",
+    answer: "",
+    options: ["", "", "", ""],
+  });
+
   const [subject, setSubject] = useState("");
   const [curIndex, setCurIndex] = useState(0);
-  const [question, setQuestion] = useState(addEmptyQues);
-  const [notes, setNotes] = useState([]);
+  const [question, setQuestion] = useState([createEmptyQuestion()]);
+  const [notes, setNotes] = useState([""]);
   const [error, setError] = useState({
     quesError: "",
     optionError: "",
     answerError: "",
+    subjectError: "",
   });
   const [edit, setEdit] = useState(false);
+  const validate = (name, value) => {
+    const newErrors = {};
+    if (name === "allfield") {
+      const currentQuestion = question[curIndex];
 
-  const validate = () => {
-    const error = {};
-    if (question[curIndex].question === "") {
-      error.quesError = "enter question!";
+      if (currentQuestion.question === "") {
+        newErrors.quesError = "Question is required";
+      }
+
+      const emptyOption = currentQuestion.options.some((opt) => opt === "");
+      if (emptyOption) {
+        newErrors.optionError = "All options are required";
+      }
+
+      if (currentQuestion.answer === "") {
+        newErrors.answerError = "Please select a correct answer";
+      }
+      if (subject === "") {
+        newErrors.subjectError = "Please select subject";
+      }
     } else {
-      error.quesError = "";
+      switch (name) {
+        case "question":
+          newErrors.quesError = value === "" ? "Question is required" : "";
+          break;
+        case "option-text":
+          newErrors.optionError =
+            value === "" ? "All options are required" : "";
+          break;
+        case "answer":
+          newErrors.answerError =
+            value === "" ? "Select one correct answer!" : "";
+          break;
+        case "subject":
+          newErrors.subjectError = value === "" ? "Please select subject!" : "";
+          break;
+        default:
+          break;
+      }
     }
-    const setoption = question[curIndex].options.some((element) => {
-      return element === "";
+    setError(newErrors);
+    return newErrors;
+  };
+  const checkExisting = () => {
+    let include;
+    const quesValue = question[curIndex].question;
+    const optionValue = question[curIndex].options;
+    question.forEach((element, index) => {
+      if (element.question.includes(quesValue) && curIndex !== index) {
+        include = true;
+      }
     });
-    if (setoption) {
-      error.optionError = "any option can't be empty!";
-    } else {
-      error.optionError = "";
-    }
-    if (question[curIndex].answer === "") {
-      error.answerError = "select any one from above!";
-    } else {
-      error.answerError = "";
-    }
-    setError(error);
-    return error;
+    new Set(optionValue).size !== optionValue.length ? (include = true) : null;
+    return include;
   };
-  const handleQuesChange = (e) => {
-    setEdit(true);
-    const update = [...question];
-    update[curIndex].question = e.target.value;
-    setQuestion(update);
-    validate();
-  };
-  const handleOptionChange = (e, index) => {
-    const update = [...question];
-    update[curIndex].options[index] = e.target.value;
-    setQuestion(update);
-    validate();
-  };
-  // const addQuestion = (e) => {
-  //   e.preventDefault();
-  //   if (question.length < 15) {
-  //     setQuestion([...question, ...addEmptyQues]);
-  //     setCurIndex(curIndex + 1);
-  //   }
-  // };
 
-  const saveChanges = () => {
-    setEdit(false);
-  };
-  const handleNotes = (e) => {
+  const handleQuesChange = (e) => {
     const { value } = e.target;
-    setNotes([value]);
+    const update = [...question];
+    update[curIndex].question = value;
+    setQuestion(update);
+    validate("question", value);
+    setEdit(true);
+  };
+
+  const handleOptionChange = (e, index) => {
+    const { value } = e.target;
+    const update = [...question];
+    update[curIndex].options[index] = value;
+
+    if (update[curIndex].answer === index && value === "") {
+      update[curIndex].answer = null;
+    }
+
+    setQuestion(update);
+    validate("option-text", value);
+    setEdit(true);
+  };
+
+  const handleRadio = (index) => {
+    const update = [...question];
+    update[curIndex].answer = index;
+    setQuestion(update);
+    validate("answer", update[curIndex].options[index]);
+  };
+
+  const handleSubject = (e) => {
+    const { name, value } = e.target;
+    setSubject(e.target.value);
+    validate(name, value);
   };
 
   const handlePrevious = (e) => {
     e.preventDefault();
     setCurIndex(curIndex - 1);
   };
+  console.log("ques", question);
   const handleNext = (e) => {
-    const error = validate();
-    const hasError = Object.values(error).some((element) => element !== "");
-    if (hasError) {
-      e.preventDefault();
-    } else {
-      setQuestion([...question, ...addEmptyQues]);
-      setCurIndex(curIndex + 1);
+    e.preventDefault();
+    const validationErrors = validate("allfield");
+    if (Object.values(validationErrors).some((err) => err !== "")) return;
+    const include = checkExisting();
+
+    if (include) {
+      toast("Question already included or any of the options are same", {
+        autoClose: 1000,
+        position: "top-center",
+      });
+      return;
     }
 
-    // if (edit) {
-    //   toast("Please save the changes first", {
-    //     position: "top-center",
-    //     autoClose: 1000,
-    //   });
-    // }
-    // if (question.length < 15) {
-    //   setQuestion([...question, ...addEmptyQues]);
-    //   setCurIndex(curIndex + 1);
-    // }
-    // if (curIndex + 1 === question.length) {
-    //   alert("please add Question first..");
-    // } else {
-    //   setCurIndex(curIndex + 1);
-    // }
-  };
-  // const handleAnswerChange = (e) => {
-  //   const update = [...question];
-  //   update[curIndex].answer = e.target.value;
-  //   setQuestion(update);
-  // };
-  const handleRadio = (e) => {
-    const update = [...question];
-    update[curIndex].answer = e.target.value;
-    setQuestion(update);
-    validate();
-  };
-  const handleSubject = (e) => {
-    setSubject(e.target.value);
+    if (edit) {
+      toast.error("Please save the changes before proceeding.", {
+        position: "top-center",
+        autoClose: 1000,
+      });
+      return;
+    }
+    if (curIndex < question.length - 1) {
+      setCurIndex(curIndex + 1);
+    } else {
+      const updatedQuestions = [...question, createEmptyQuestion()];
+      setQuestion(updatedQuestions);
+      setCurIndex(curIndex + 1);
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleNotes = (e) => {
+    setNotes([e.target.value]);
+  };
+  const saveChanges = (e) => {
     e.preventDefault();
-    const examobj = {
+    const validationErrors = validate("allfield");
+    if (Object.values(validationErrors).some((err) => err !== "")) return;
+    const include = checkExisting();
+    if (include) {
+      toast("Question already included or any of the options are same", {
+        autoClose: 1000,
+        position: "top-center",
+      });
+      return;
+    } else {
+      setEdit(false);
+      toast.success("saved successfully!", {
+        position: "top-center",
+        autoClose: 1000,
+      });
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+
+    const validationErrors = validate("allfield");
+    if (Object.values(validationErrors).some((err) => err !== "")) return;
+    const exam = {
       subjectName: subject,
-      questions: question,
+      questions: question.map((q) => ({
+        ...q,
+        answer: q.options[q.answer],
+      })),
       notes: notes,
     };
-    console.log(examobj);
+
+    try {
+      const response = await instance({
+        url: "dashboard/Teachers/Exam",
+        method: "POST",
+        data: exam,
+        headers: {
+          "access-token": token,
+        },
+      });
+      console.log(response);
+      if (response.data.message) {
+        toast(response.data.message, {
+          position: "top-center",
+          autoClose: 1000,
+        });
+      }
+      if (response.data.statusCode === 200) {
+        navigate("/dashboard");
+      }
+    } catch (e) {
+      toast.error("something went wrong!", {
+        position: "top-center",
+        autoClose: 1000,
+      });
+    }
   };
+
   return (
     <div className={styles.flex}>
       <ToastContainer />
-
-      <form onSubmit={(e) => handleSubmit(e)} className={styles.inner}>
-        {curIndex === 0 ? (
+      <form onSubmit={handleSubmit} className={styles.inner}>
+        {curIndex === 0 && (
           <>
-            <h2>create Exam</h2>
+            <h2>Create Exam</h2>
             <label htmlFor="subject">Subject</label>
             <input
               type="text"
               value={subject}
-              placeholder="enter subject"
-              onChange={(e) => handleSubject(e)}
+              name="subject"
+              placeholder="Enter subject"
+              onChange={handleSubject}
             />
+            <ErrorContainer error={error.subjectError} />
           </>
-        ) : null}
-        {addEmptyQues.map((ques) => {
-          return (
-            <>
-              <label htmlFor="question">Question{curIndex + 1}</label>
-              <input
-                type="text"
-                placeholder={`enter question ${curIndex + 1}`}
-                value={question[curIndex].question}
-                onChange={(e) => {
-                  handleQuesChange(e);
-                }}
-              />
-              <ErrorContainer error={error.quesError} />
-              <label htmlFor="options">Options</label>
-              {ques.options.map((element, index) => {
-                return (
-                  <div className={styles.optionContainer}>
-                    <input
-                      type="radio"
-                      name="option"
-                      value={question[curIndex].options[index]}
-                      onChange={(e) => {
-                        handleRadio(e);
-                      }}
-                    />
-                    <input
-                      type="text"
-                      value={question[curIndex].options[index]}
-                      onChange={(e) => handleOptionChange(e, index)}
-                      placeholder={`enter option ${index + 1}`}
-                    />
-                  </div>
-                );
-              })}
-              <ErrorContainer error={error.optionError} />
+        )}
 
-              <label htmlFor="answer">Answer</label>
-              <input
-                type="text"
-                value={question[curIndex].answer}
-                placeholder="select correct answer from above"
-              />
-              <ErrorContainer error={error.answerError} />
-            </>
-          );
-        })}
+        {question.length > 0 && (
+          <>
+            <label htmlFor="question">Question {curIndex + 1}</label>
+            <input
+              type="text"
+              name="question"
+              placeholder={`Enter question ${curIndex + 1}`}
+              value={question[curIndex].question}
+              onChange={handleQuesChange}
+            />
+            <ErrorContainer error={error.quesError} />
+
+            <label>Options</label>
+            {question[curIndex].options.map((opt, index) => (
+              <div key={index} className={styles.optionContainer}>
+                <input
+                  type="radio"
+                  name={`question-${curIndex}`}
+                  value={index}
+                  checked={question[curIndex].answer === index}
+                  onChange={() => handleRadio(index)}
+                />
+                <input
+                  type="text"
+                  name="option-text"
+                  value={opt}
+                  onChange={(e) => handleOptionChange(e, index)}
+                  placeholder={`Enter option ${index + 1}`}
+                />
+              </div>
+            ))}
+            <ErrorContainer error={error.optionError} />
+
+            <label>Answer</label>
+            <input
+              name="answer"
+              type="text"
+              value={
+                question[curIndex].answer !== ""
+                  ? question[curIndex].options[question[curIndex].answer]
+                  : ""
+              }
+              placeholder="select Correct answer from above"
+              readOnly
+            />
+            <ErrorContainer error={error.answerError} />
+          </>
+        )}
+
         <div className={styles.btnContainer}>
           <button
             className={styles.btn}
-            onClick={(e) => handlePrevious(e)}
+            onClick={handlePrevious}
             disabled={curIndex === 0}
           >
             Previous
           </button>
           {curIndex < 14 ? (
             <>
-              {/* <button className={styles.btn} onClick={(e) => addQuestion(e)}>
-                Add Question
-              </button> */}
-              <button className={styles.btn} onClick={saveChanges}>
+              <button className={styles.btn} onClick={(e) => saveChanges(e)}>
                 Save
               </button>
-              <button className={styles.btn} onClick={(e) => handleNext(e)}>
+              <button className={styles.btn} onClick={handleNext}>
                 Next
               </button>
             </>
           ) : (
-            <>
-              <button type="submit" className={styles.btn}>
-                Submit
-              </button>
-            </>
+            <button type="submit" className={styles.btn}>
+              Submit
+            </button>
           )}
         </div>
-        {curIndex === 14 ? (
+
+        {curIndex === 14 && (
           <>
             <label htmlFor="notes">Add notes</label>
-
             <input
               type="text"
-              placeholder="enter notes"
-              onChange={(e) => {
-                handleNotes(e);
-              }}
+              value={notes}
+              placeholder="Enter notes"
+              onChange={(e) => handleNotes(e)}
             />
+            {/* {notes.map((element, index) => {
+              return (
+                <input
+                  type="text"
+                  value={element[index]}
+                  placeholder="Enter notes"
+                  onChange={(e) => handleNotes(e, index)}
+                />
+              );
+            })}
+            <button onClick={(e, index) => addNotes(e, index)}>
+              Add Notes
+            </button> */}
           </>
-        ) : null}
+        )}
       </form>
     </div>
   );
 }
+
 const ErrorContainer = ({ error }) => {
   if (error) {
     return <span style={{ color: "red" }}>{error}</span>;
@@ -241,14 +340,3 @@ const ErrorContainer = ({ error }) => {
     return null;
   }
 };
-
-//if change->save first
-//validation if any value is empty(before next)
-//field check error again error empty on change
-//if nochange->save first
-//same-create and edit
-//next,previous btn,with notes field at last
-
-//changes:
-// validaion break
-//option clear

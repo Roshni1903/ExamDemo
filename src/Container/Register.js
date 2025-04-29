@@ -20,8 +20,8 @@ export default function Register() {
     setLoading(true);
     try {
       const response = await instance({
-        url: "users/SignUp",
         method: "POST",
+        url: "users/SignUp",
         data,
       });
       if (response.data.message) {
