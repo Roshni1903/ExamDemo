@@ -1,8 +1,12 @@
 import React, { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
-import instance from "../../axiosInstance";
 import styles from "./createExam.module.css";
+import instance from "/src/component/axiosInstance.jsx";
+import { useNavigate } from "react-router-dom";
+import SideBar from "../../CommonUser/SideBar";
 export default function CreateExam() {
+  const role = localStorage.getItem("role");
+  const navigate = useNavigate();
   const createEmptyQuestion = () => ({
     question: "",
     answer: "",
@@ -18,10 +22,11 @@ export default function CreateExam() {
     optionError: "",
     answerError: "",
     subjectError: "",
+    notesError: "",
   });
   const [edit, setEdit] = useState(false);
   const validate = (name, value) => {
-    const newErrors = {};
+    const newErrors = { ...error };
     if (name === "allfield") {
       const currentQuestion = question[curIndex];
 
@@ -56,6 +61,9 @@ export default function CreateExam() {
         case "subject":
           newErrors.subjectError = value === "" ? "Please select subject!" : "";
           break;
+        case "notes":
+          newErrors.notesError =
+            value === "" ? "Please enter notes NA if not applicable" : "";
         default:
           break;
       }
@@ -63,6 +71,7 @@ export default function CreateExam() {
     setError(newErrors);
     return newErrors;
   };
+
   const checkExisting = () => {
     let include;
     const quesValue = question[curIndex].question;
@@ -113,8 +122,19 @@ export default function CreateExam() {
   };
 
   const handlePrevious = (e) => {
-    e.preventDefault();
-    setCurIndex(curIndex - 1);
+    if (edit) {
+      toast.error(
+        "Please save  changes before moving to the previous question.",
+        {
+          position: "top-center",
+          autoClose: 1000,
+        }
+      );
+      return;
+    }
+    if (curIndex > 0) {
+      setCurIndex(curIndex - 1);
+    }
   };
   console.log("ques", question);
   const handleNext = (e) => {
@@ -123,13 +143,13 @@ export default function CreateExam() {
     if (Object.values(validationErrors).some((err) => err !== "")) return;
     const include = checkExisting();
 
-    if (include) {
-      toast("Question already included or any of the options are same", {
-        autoClose: 1000,
-        position: "top-center",
-      });
-      return;
-    }
+    // if (include) {
+    //   toast("Question already included or any of the options are same", {
+    //     autoClose: 1000,
+    //     position: "top-center",
+    //   });
+    //   return;
+    // }
 
     if (edit) {
       toast.error("Please save the changes before proceeding.", {
@@ -147,8 +167,20 @@ export default function CreateExam() {
     }
   };
 
-  const handleNotes = (e) => {
-    setNotes([e.target.value]);
+  const addNotes = () => {
+    setNotes([...notes, ""]);
+  };
+  const handleNotes = (e, index) => {
+    const { name, value } = e.target;
+    const updateNotes = [...notes];
+    updateNotes[index] = e.target.value;
+    setNotes(updateNotes);
+    validate(name, value);
+    setEdit(true);
+  };
+  const deleteNote = (rindex) => {
+    const updateNotes = notes.filter((_, index) => index !== rindex);
+    setNotes(updateNotes);
   };
   const saveChanges = (e) => {
     e.preventDefault();
@@ -176,6 +208,16 @@ export default function CreateExam() {
 
     const validationErrors = validate("allfield");
     if (Object.values(validationErrors).some((err) => err !== "")) return;
+    if (edit) {
+      toast.error(
+        "Please save  changes before moving to the previous question.",
+        {
+          position: "top-center",
+          autoClose: 1000,
+        }
+      );
+      return;
+    }
     const exam = {
       subjectName: subject,
       questions: question.map((q) => ({
@@ -205,15 +247,13 @@ export default function CreateExam() {
         navigate("/dashboard");
       }
     } catch (e) {
-      toast.error("something went wrong!", {
-        position: "top-center",
-        autoClose: 1000,
-      });
+      console.log(e);
     }
   };
 
   return (
     <div className={styles.flex}>
+      <SideBar role={role} />
       <ToastContainer />
       <form onSubmit={handleSubmit} className={styles.inner}>
         {curIndex === 0 && (
@@ -285,15 +325,20 @@ export default function CreateExam() {
             className={styles.btn}
             onClick={handlePrevious}
             disabled={curIndex === 0}
+            type="button"
           >
             Previous
           </button>
+          <button
+            type="button"
+            className={styles.btn}
+            onClick={(e) => saveChanges(e)}
+          >
+            Save
+          </button>
           {curIndex < 14 ? (
             <>
-              <button className={styles.btn} onClick={(e) => saveChanges(e)}>
-                Save
-              </button>
-              <button className={styles.btn} onClick={handleNext}>
+              <button type="button" className={styles.btn} onClick={handleNext}>
                 Next
               </button>
             </>
@@ -307,25 +352,27 @@ export default function CreateExam() {
         {curIndex === 14 && (
           <>
             <label htmlFor="notes">Add notes</label>
-            <input
-              type="text"
-              value={notes}
-              placeholder="Enter notes"
-              onChange={(e) => handleNotes(e)}
-            />
-            {/* {notes.map((element, index) => {
+            {notes.map((element, index) => {
               return (
-                <input
-                  type="text"
-                  value={element[index]}
-                  placeholder="Enter notes"
-                  onChange={(e) => handleNotes(e, index)}
-                />
+                <div key={index} className={styles.note}>
+                  <input
+                    type="text"
+                    name="notes"
+                    value={element}
+                    placeholder="Enter notes"
+                    onChange={(e) => handleNotes(e, index)}
+                  />
+                  <button type="button" onClick={() => deleteNote(index)}>
+                    X
+                  </button>
+                </div>
               );
             })}
-            <button onClick={(e, index) => addNotes(e, index)}>
+            <ErrorContainer error={error.notesError} />
+
+            <button type="button" onClick={(e, index) => addNotes(e, index)}>
               Add Notes
-            </button> */}
+            </button>
           </>
         )}
       </form>

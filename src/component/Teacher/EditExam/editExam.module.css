@@ -70,11 +70,19 @@ input:focus {
     padding: 8px 15px;
     border-radius: 5px;
 }
-
+.spinnerContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
+  }
 .optionContainer {
     display: grid;
     grid-template-columns: auto 1fr;
     align-items: center;
     column-gap: 10px;
     margin-bottom: 10px;
+}
+.note {
+    display: flex;
 }

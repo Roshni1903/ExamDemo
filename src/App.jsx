@@ -23,7 +23,6 @@ export default function App() {
   return (
     <>
       {hideNavbar ? null : <Navbar />}
-
       <Routes>
         <Route path="/create-exam" element={<CreateExam />} />
         <Route path="/" element={<LoginUi desc={loginDesc} />}></Route>
@@ -48,7 +47,6 @@ export default function App() {
           }
         ></Route>
         <Route path="/edit-exam/:id" element={<EditExam />}></Route>
-
         <Route path="*" element={<Navigate to="/404" />}></Route>
         <Route path="/404" element={<h1>Page not found!</h1>} />
         <Route path="/dashboard/profile" element={<Profile />}></Route>
@@ -56,3 +54,10 @@ export default function App() {
     </>
   );
 }
+
+//issues
+//Token exists->out navbar create,logout
+//if token->login and reg not accessible
+//loc / and token navbar
+//protected->login navbar login register dashboard
+//public->

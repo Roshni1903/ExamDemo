@@ -31,6 +31,9 @@ export default function Login() {
           autoClose: 1000,
         });
       }
+      const { name, email } = response.data.data;
+      localStorage.setItem("name", name);
+      localStorage.setItem("email", email);
       if (response.data.statusCode === 200) {
         localStorage.setItem("role", response.data.data.role);
         localStorage.setItem("token", response.data.data.token);
