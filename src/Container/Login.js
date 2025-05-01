@@ -24,19 +24,19 @@ export default function Login() {
         method: "POST",
         data,
       });
-      console.log(response);
       if (response.data.message) {
         toast(response.data.message, {
           position: "top-center",
           autoClose: 1000,
         });
       }
-      const { name, email } = response.data.data;
-      localStorage.setItem("name", name);
-      localStorage.setItem("email", email);
       if (response.data.statusCode === 200) {
-        localStorage.setItem("role", response.data.data.role);
-        localStorage.setItem("token", response.data.data.token);
+        const { name, email, role, token } = response.data.data;
+        localStorage.setItem("role", role);
+        localStorage.setItem("email", email);
+        localStorage.setItem("name", name);
+        localStorage.setItem("token", token);
+
         navigate("/dashboard");
       }
       setLoading(false);

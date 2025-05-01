@@ -1,12 +1,10 @@
 import React from "react";
-import AdminDashboard from "../Teacher/AdminDashboard";
-import StudentDashboard from "../Student/StudentDashboard";
-import SideBar from "./SideBar";
-
-export default function Dashboard({ role }) {
+import AdminDashboard from "../Teacher/AdminDashboard/AdminDashboard";
+import StudentDashboard from "../Student/StudentDashboard/StudentDashboard";
+export default function Dashboard() {
+  const role = localStorage.getItem("role");
   return (
     <div>
-      <SideBar role={role} />
       <div style={{ marginLeft: "240px" }}>
         {role === "teacher" ? <AdminDashboard /> : <StudentDashboard />}
       </div>
