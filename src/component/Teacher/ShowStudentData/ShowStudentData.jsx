@@ -18,7 +18,6 @@ export default function ShowStudentData() {
             "access-token": token,
           },
         });
-        // console.log(response.data);
         setStudents(response.data.data);
         setLoading(false);
       } catch (e) {

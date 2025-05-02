@@ -1,40 +1,37 @@
 import { useNavigate } from "react-router-dom";
-import loginDesc from "../Description/loginDesc";
 import commonContainer from "./commonContainer";
 import { toast } from "react-toastify";
 import instance from "/src/component/axiosInstance.jsx";
 import { setError, clearData } from "../Redux/FormReducer";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
-export default function Login() {
+import resetPassDesc from "../Description/resetPassDesc";
+export default function ResetPassword() {
   const [loading, setLoading] = useState(false);
-
-  const { data, error, handleChange, validate } = commonContainer(
-    "login",
-    loginDesc
-  );
+  const token = localStorage.getItem("token");
   const navigate = useNavigate();
+  const { data, error, handleChange, validate } = commonContainer(
+    "resetPassword",
+    resetPassDesc
+  );
   const dispatch = useDispatch();
 
   const submitData = async (data) => {
     setLoading(true);
     try {
       const response = await instance({
-        url: "users/Login",
+        url: "users/ResetPassword",
         method: "POST",
+        headers: {
+          "access-token": token,
+        },
         data,
       });
       if (response.data.message) {
         toast(response.data.message, {
           position: "top-center",
-          autoClose: 1000,
+          autoClose: 1500,
         });
-      }
-      if (response.data.statusCode === 200) {
-        const { name, email, role, token } = response.data.data;
-        localStorage.setItem("role", role);
-        localStorage.setItem("token", token);
-
         navigate("/dashboard");
       }
       setLoading(false);
@@ -53,13 +50,13 @@ export default function Login() {
       const submitError = validate(name, value);
       Object.assign(newSubmit, submitError);
     });
-    dispatch(setError({ type: "login", error: newSubmit }));
+    dispatch(setError({ type: "resetPassword", error: newSubmit }));
     const hasError = Object.values(newSubmit).some((element) => element !== "");
     if (hasError) {
       e.preventDefault();
     } else {
       submitData(data);
-      dispatch(clearData({ type: "login" }));
+      dispatch(clearData({ type: "resetPassword" }));
     }
   };
   return {

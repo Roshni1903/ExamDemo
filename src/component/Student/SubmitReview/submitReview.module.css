@@ -50,7 +50,7 @@ input:focus {
     color: white;
     font-size: 17px;
     border: none;
-    padding: 8px 15px;
+    padding: 8px 10px;
     border-radius: 5px;
     cursor: pointer;
 }
@@ -81,4 +81,12 @@ input:focus {
     justify-content: center;
     align-items: center;
     height: 100vh;
+}
+.edit{ background-color: #8E1616;
+    color: white;
+    font-size: 17px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width:100px;
 }

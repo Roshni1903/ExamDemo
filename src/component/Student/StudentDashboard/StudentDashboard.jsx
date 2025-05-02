@@ -16,6 +16,7 @@ export default function StudentDashboard() {
             "access-token": token,
           },
         });
+        console.log(response);
         setAllExam(response.data.data);
         setLoading(false);
       } catch (e) {
@@ -42,6 +43,10 @@ export default function StudentDashboard() {
                 <th>Subject Name</th>
                 <th colSpan={2}>Notes</th>
                 <th>Actions</th>
+                <th>Score</th>
+                <th>Rank</th>
+
+                <th>Result Status</th>
               </tr>
             </thead>
             <tbody>
@@ -54,12 +59,25 @@ export default function StudentDashboard() {
                   <td>
                     <div className={styles.actions}>
                       <Link to={`/start-exam/${element._id}`}>
-                        <button id={element._id} className={styles.btn}>
+                        <button
+                          id={element._id}
+                          className={styles.btn}
+                          disabled={element.Result.length !== 0}
+                        >
                           Start Exam
                         </button>
                       </Link>
                     </div>
                   </td>
+                  {element?.Result?.map((resultElement) => {
+                    return (
+                      <>
+                        <td>{resultElement.score}</td>
+                        <td>{resultElement.rank}</td>
+                        <td>{resultElement.resultStatus}</td>
+                      </>
+                    );
+                  })}
                 </tr>
               ))}
             </tbody>
@@ -71,4 +89,12 @@ export default function StudentDashboard() {
 }
 
 //   "Result": []->empty array available
-//table styling issue
+// Result
+// :
+// Array(1)
+// 0
+// :
+// {_id: '6814c02237b3c500621c6b48', rank: 13, subjectName: 'C/C++', score: 3, resultStatus: 'Declared'}
+// length
+// :
+// 1

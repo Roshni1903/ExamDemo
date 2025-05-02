@@ -30,7 +30,7 @@ const Navbar = () => {
             ) : null}
             <Link className={styles.link} to="/">
               <button onClick={handleLogout} className={styles.btn}>
-                Logout{" "}
+                Logout{""}
               </button>
             </Link>
           </>

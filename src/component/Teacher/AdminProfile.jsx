@@ -1,8 +1,9 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
-export default function Profile() {
-  const name = localStorage.getItem("name");
-  const email = localStorage.getItem("email");
+export default function AdminProfile() {
+  // const name = localStorage.getItem("name");
+  // const email = localStorage.getItem("email");
 
   return (
     <div
@@ -16,8 +17,10 @@ export default function Profile() {
       }}
     >
       <h2>Profile</h2>
-      <p>Name: {name}</p>
-      <p>Email: {email}</p>
+      <p>Name: Admin</p>
+      <Link to="/reset-password">
+        <button>Change Password</button>
+      </Link>
     </div>
   );
 }

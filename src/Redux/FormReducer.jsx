@@ -3,6 +3,8 @@ import registerDesc from "../Description/registerDesc";
 import loginDesc from "../Description/loginDesc";
 import ForgetDesc from "../Description/ForgetDesc";
 import newPassDesc from "../Description/newPassDesc";
+import profileDesc from "../Description/ProfileDesc";
+import resetPassDesc from "../Description/resetPassDesc";
 // console.log(registerDesc);
 // console.log(loginDesc);
 
@@ -11,6 +13,8 @@ const forms = {
   login: loginDesc,
   forget: ForgetDesc,
   newPass: newPassDesc,
+  changeProfile: profileDesc,
+  resetPassword: resetPassDesc,
 };
 // const initialState = {
 //   login: {

@@ -3,15 +3,18 @@ import { Link, useParams } from "react-router-dom";
 import instance from "/src/component/axiosInstance.jsx";
 import styles from "./StartExam.module.css";
 import LoadingSpinner from "/src/component/LoadingSpinner/LoadingSpinner.jsx";
+import { toast, ToastContainer } from "react-toastify";
 
 export default function StartExam() {
   const token = localStorage.getItem("token");
+  const { id } = useParams();
+
   const [getExam, setExam] = useState([]);
   const [curIndex, setCurIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [answer, setAnswer] = useState([]);
-  const [submit, setSubmit] = useState([]);
-  const { id } = useParams();
+  const [edit, setEdit] = useState(false);
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -29,39 +32,72 @@ export default function StartExam() {
         setLoading(false);
       }
     };
+
     if (token) {
       fetchData();
     }
-  }, []);
+  }, [id, token]);
 
-  const handleRadio = (id, e, index) => {
-    // console.log(getExam[curIndex].options[index]);
-    // const { value } = e.target;
-    // const update = [...answer];
-    // update[curIndex] = { question: id, answer: value };
-    // setAnswer(update);
-    // const updateSubmit = [...submit];
-    // updateSubmit[curIndex] = {
-    //   question: getExam[curIndex].question,
-    //   answer: value,
-    // };
-    // setSubmit(updateSubmit);
+  const handleRadio = (questionId, value) => {
+    const updatedAnswers = [...answer];
+    updatedAnswers[curIndex] = { question: questionId, answer: value };
+    setAnswer(updatedAnswers);
+    setEdit(true);
   };
-  console.log(getExam);
 
-  const handleNext = (e) => {
-    e.preventDefault();
-    setCurIndex(curIndex + 1);
+  const handleNext = () => {
+    if (edit) {
+      toast.error("Please save changes before moving to the next question.", {
+        position: "top-center",
+        autoClose: 1000,
+      });
+      return;
+    }
+    setCurIndex((prev) => prev + 1);
   };
-  const handlePrevious = (e) => {
-    e.preventDefault();
-    setCurIndex(curIndex - 1);
+
+  const handlePrevious = () => {
+    if (edit) {
+      toast.error(
+        "Please save changes before moving to the previous question.",
+        {
+          position: "top-center",
+          autoClose: 1000,
+        }
+      );
+      return;
+    }
+    setCurIndex((prev) => prev - 1);
   };
+
+  const saveChanges = () => {
+    setEdit(false);
+
+    toast.success("Saved successfully!", {
+      position: "top-center",
+      autoClose: 1000,
+    });
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (edit) {
+      toast.error(
+        "Please save changes before moving to the previous question.",
+        {
+          position: "top-center",
+          autoClose: 1000,
+        }
+      );
+      return;
+    } else {
+      console.log(answer);
+    }
   };
+
   return (
     <>
+      <ToastContainer />
       {loading ? (
         <div className={styles.spinnerContainer}>
           <LoadingSpinner />
@@ -69,69 +105,75 @@ export default function StartExam() {
       ) : (
         <div className={styles.flex}>
           <h1>Exam</h1>
-          {/* <form className={styles.inner}>
-            <label>Question {curIndex + 1}</label>
-            <input
-              type="text"
-              name="question"
-              value={getExam[curIndex]?.question}
-              readOnly
-            />
-            <label>Options</label>
-            {getExam[curIndex]?.options.map((optionValues, index) => {
-              return (
-                <>
-                  <label>
-                    {optionValues}
+          {getExam?.length > 0 && (
+            <form className={styles.inner}>
+              <label>Question {curIndex + 1}</label>
+              <input
+                type="text"
+                name="question"
+                value={getExam[curIndex]?.question}
+                readOnly
+              />
+
+              <label>Options</label>
+              <div className={styles.optionContainer}>
+                {getExam[curIndex]?.options.map((optionValue, index) => (
+                  <label key={index}>
                     <input
                       type="radio"
                       name={`question-${curIndex}`}
-                      value={optionValues}
-                      onChange={(e) =>
-                        handleRadio(getExam[curIndex]._id, e, index)
+                      value={optionValue}
+                      checked={answer[curIndex]?.answer === optionValue}
+                      onChange={() =>
+                        handleRadio(getExam[curIndex]._id, optionValue)
                       }
                     />
+                    {optionValue}
                   </label>
-                </>
-              );
-            })}
-            <div className={styles.btnContainer}>
-              <button
-                type="button"
-                className={styles.btn}
-                onClick={(e) => handlePrevious(e)}
-                disabled={curIndex === 0}
-              >
-                Previous
-              </button>
-              {curIndex <= 5 ? (
+                ))}
+              </div>
+
+              <div className={styles.btnContainer}>
                 <button
                   type="button"
                   className={styles.btn}
-                  onClick={(e) => handleNext(e)}
+                  onClick={handlePrevious}
+                  disabled={curIndex === 0}
                 >
-                  Next
+                  Previous
                 </button>
-              ) : null}
-
-              {curIndex === 6 ? (
-                <Link to="/submit-review">
+                <button
+                  type="button"
+                  className={styles.btn}
+                  onClick={saveChanges}
+                >
+                  Save
+                </button>
+                {curIndex < getExam.length - 1 && (
                   <button
-                    onClick={handleSubmit}
-                    type="submit"
+                    type="button"
                     className={styles.btn}
+                    onClick={handleNext}
                   >
-                    Submit & Review
+                    Next
                   </button>
-                </Link>
-              ) : null}
-            </div>
-          </form> */}
+                )}
+
+                {curIndex === getExam.length - 1 && (
+                  <Link
+                    to={`/submit-review/id=${id}`}
+                    state={{ answers: answer, getExam: getExam }}
+                  >
+                    <button type="submit" className={styles.btn}>
+                      Submit & Review
+                    </button>
+                  </Link>
+                )}
+              </div>
+            </form>
+          )}
         </div>
       )}
     </>
   );
 }
-
-//submit other page
-//you cannot give exam again disable if one time clicked
