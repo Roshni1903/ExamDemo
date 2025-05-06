@@ -83,7 +83,13 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          <Route path="/student/dashboard" element={<StudentDashboard />} />
+          <Route
+            path="/student/dashboard"
+            element={
+              <StudentDashboard key={location.state?.refresh || "default"} />
+            }
+          />
+
           <Route
             path="/edit-profile"
             element={<ChangeProfileUi desc={profileDesc} />}

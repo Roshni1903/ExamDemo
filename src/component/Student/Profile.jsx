@@ -12,6 +12,7 @@ export default function Profile() {
     role: "",
   });
   const token = localStorage.getItem("token");
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -22,7 +23,7 @@ export default function Profile() {
           },
         });
         const { name, email, role } = response.data.data;
-        setProfile({ name: name, email: email, role: role });
+        setProfile({ name, email, role });
         setLoading(false);
       } catch (e) {
         toast.error("Something went wrong!", {
@@ -36,36 +37,60 @@ export default function Profile() {
       fetchData();
     }
   }, [token]);
-  // const name = localStorage.getItem("name");
-  // const email = localStorage.getItem("email");
+
+  const buttonStyle = {
+    padding: "8px 16px",
+    backgroundColor: "#8E1616",
+    color: "#fff",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+    textDecoration: "none",
+  };
 
   return (
     <>
       {loading ? (
-        <div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "80vh",
+          }}
+        >
           <LoadingSpinner />
         </div>
       ) : (
         <div
           style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            marginTop: "20px",
+            maxWidth: "400px",
+            margin: "40px auto",
             padding: "20px",
+            textAlign: "center",
+            border: "1px solid #ccc",
+            borderRadius: "8px",
           }}
         >
-          <h2>Profile</h2>
-          <p>Name: {profile.name}</p>
-          <p>Email: {profile.email}</p>
-          <p>Role: {profile.role}</p>
-          <Link to="/edit-profile">
-            <button>edit Profile</button>
-          </Link>
-          <Link to="/reset-password">
-            <button>Change Password</button>
-          </Link>
+          <h2 style={{ marginBottom: "20px" }}>Profile</h2>
+          <p style={{ margin: "10px 0" }}>Name: {profile.name}</p>
+          <p style={{ margin: "10px 0" }}>Email: {profile.email}</p>
+          <p style={{ margin: "10px 0" }}>Role: {profile.role}</p>
+          <div
+            style={{
+              marginTop: "20px",
+              display: "flex",
+              gap: "10px",
+              justifyContent: "center",
+            }}
+          >
+            <Link to="/edit-profile" style={buttonStyle}>
+              Edit Profile
+            </Link>
+            <Link to="/reset-password" style={buttonStyle}>
+              Change Password
+            </Link>
+          </div>
         </div>
       )}
     </>

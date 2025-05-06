@@ -3,11 +3,11 @@ import { NavLink } from "react-router-dom";
 import styles from "./sidebar.module.css";
 const sidebar = {
   student: [
-    { name: "Dashboard", path: "/dashboard" },
+    { name: "Dashboard", path: "/student/dashboard" },
     { name: "Profile", path: "/student/profile" },
   ],
   teacher: [
-    { name: "Dashboard", path: "/dashboard" },
+    { name: "Dashboard", path: "/teacher/dashboard" },
     { name: "Students", path: "/students" },
     { name: "Profile", path: "/teacher/profile" },
   ],
