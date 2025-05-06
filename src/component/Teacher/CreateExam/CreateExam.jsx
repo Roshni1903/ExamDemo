@@ -9,7 +9,7 @@ export default function CreateExam() {
   const navigate = useNavigate();
   const createEmptyQuestion = () => ({
     question: "",
-    answer: "",
+    answer: null,
     options: ["", "", "", ""],
   });
 
@@ -39,12 +39,17 @@ export default function CreateExam() {
         newErrors.optionError = "All options are required";
       }
 
-      if (currentQuestion.answer === "") {
+      if (currentQuestion.answer === null) {
         newErrors.answerError = "Please select a correct answer";
       }
       if (subject === "") {
         newErrors.subjectError = "Please select subject";
       }
+      // if (notes.length === 0 || notes.some(note => note.trim() === "")) {
+      //     newErrors.notesError = "Please add at least one valid note.";
+      // } else {
+      //     newErrors.notesError = "";
+      // }
     } else {
       switch (name) {
         case "question":
@@ -56,7 +61,7 @@ export default function CreateExam() {
           break;
         case "answer":
           newErrors.answerError =
-            value === "" ? "Select one correct answer!" : "";
+            value === null ? "Select one correct answer!" : "";
           break;
         case "subject":
           newErrors.subjectError = value === "" ? "Please select subject!" : "";
@@ -76,11 +81,13 @@ export default function CreateExam() {
     let include;
     const quesValue = question[curIndex].question;
     const optionValue = question[curIndex].options;
-    question.forEach((element, index) => {
-      if (element.question.includes(quesValue) && curIndex !== index) {
-        include = true;
-      }
-    });
+    const isDuplicateQuestion = question.some(
+      (q, index) => index !== curIndex && q.question.toLowerCase() === quesValue
+    );
+    if (isDuplicateQuestion) {
+      include = true;
+      return include;
+    }
     new Set(optionValue).size !== optionValue.length ? (include = true) : null;
     return include;
   };
@@ -96,14 +103,13 @@ export default function CreateExam() {
 
   const handleOptionChange = (e, index) => {
     const { value } = e.target;
-    const update = [...question];
-    update[curIndex].options[index] = value;
+    const updatedQuestions = [...question];
+    const currentQuestion = updatedQuestions[curIndex];
 
-    if (update[curIndex].answer === index && value === "") {
-      update[curIndex].answer = null;
-    }
+    currentQuestion.options[index] = value;
 
-    setQuestion(update);
+    setQuestion(updatedQuestions);
+
     validate("option-text", value);
     setEdit(true);
   };
@@ -136,7 +142,7 @@ export default function CreateExam() {
       setCurIndex(curIndex - 1);
     }
   };
-  console.log("ques", question);
+  // console.log("ques", question);
   const handleNext = (e) => {
     e.preventDefault();
     const validationErrors = validate("allfield");
@@ -209,13 +215,10 @@ export default function CreateExam() {
     const validationErrors = validate("allfield");
     if (Object.values(validationErrors).some((err) => err !== "")) return;
     if (edit) {
-      toast.error(
-        "Please save  changes before moving to the previous question.",
-        {
-          position: "top-center",
-          autoClose: 1000,
-        }
-      );
+      toast.error("Please save  changes before submitting.", {
+        position: "top-center",
+        autoClose: 1000,
+      });
       return;
     }
     const exam = {
@@ -236,7 +239,7 @@ export default function CreateExam() {
           "access-token": token,
         },
       });
-      console.log(response);
+      // console.log(response);
       if (response.data.message) {
         toast(response.data.message, {
           position: "top-center",
@@ -244,10 +247,13 @@ export default function CreateExam() {
         });
       }
       if (response.data.statusCode === 200) {
-        navigate("/dashboard");
+        navigate("/teacher/dashboard");
       }
     } catch (e) {
-      console.log(e);
+      toast.error("Any blank field cant be submitted!", {
+        position: "top-center",
+        autoClose: 1000,
+      });
     }
   };
 
@@ -309,7 +315,7 @@ export default function CreateExam() {
               name="answer"
               type="text"
               value={
-                question[curIndex].answer !== ""
+                question[curIndex].answer !== null
                   ? question[curIndex].options[question[curIndex].answer]
                   : ""
               }
@@ -387,3 +393,17 @@ const ErrorContainer = ({ error }) => {
     return null;
   }
 };
+
+// if (
+//   currentQuestion.answer === index &&
+//   (value === "" ||
+//     currentQuestion.options.filter((opt) => opt === value).length > 1)
+// ) {
+//   currentQuestion.answer = null;
+// }
+// if (
+//   typeof currentQuestion.answer === "number" &&
+//   currentQuestion.options[currentQuestion.answer]
+// ) {
+//   setError((prev) => ({ ...prev, answerError: "" }));
+// }
