@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import instance from "/src/component/axiosInstance.jsx";
 import styles from "./StartExam.module.css";
 import LoadingSpinner from "/src/component/LoadingSpinner/LoadingSpinner.jsx";
 import { toast, ToastContainer } from "react-toastify";
 
 export default function StartExam() {
+  const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const { id } = useParams();
 
@@ -24,11 +25,14 @@ export default function StartExam() {
             "access-token": token,
           },
         });
-        console.log(response);
+        // console.log(response);
         setExam(response.data.data);
         setLoading(false);
       } catch (e) {
-        console.log(e);
+        toast.error("Something went wrong!", {
+          position: "top-center",
+          autoClose: 1000,
+        });
         setLoading(false);
       }
     };
@@ -53,6 +57,16 @@ export default function StartExam() {
       });
       return;
     }
+    if (!answer[curIndex] || !answer[curIndex].answer) {
+      toast.error(
+        "Please select an option before moving to the next question.",
+        {
+          position: "top-center",
+          autoClose: 1000,
+        }
+      );
+      return;
+    }
     setCurIndex((prev) => prev + 1);
   };
 
@@ -67,10 +81,27 @@ export default function StartExam() {
       );
       return;
     }
+    if (!answer[curIndex] || !answer[curIndex].answer) {
+      toast.error(
+        "Please select an option before moving to the next question.",
+        {
+          position: "top-center",
+          autoClose: 1000,
+        }
+      );
+      return;
+    }
     setCurIndex((prev) => prev - 1);
   };
 
   const saveChanges = () => {
+    if (!answer[curIndex] || !answer[curIndex].answer) {
+      toast.error("Please select an option before saving.", {
+        position: "top-center",
+        autoClose: 1000,
+      });
+      return;
+    }
     setEdit(false);
 
     toast.success("Saved successfully!", {
@@ -82,16 +113,18 @@ export default function StartExam() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (edit) {
-      toast.error(
-        "Please save changes before moving to the previous question.",
-        {
-          position: "top-center",
-          autoClose: 1000,
-        }
-      );
+      toast.error("Please save changes before submit.", {
+        position: "top-center",
+        autoClose: 1000,
+      });
       return;
     } else {
-      console.log(answer);
+      navigate(`/submit-review/${id}`, {
+        state: {
+          answers: answer,
+          getExam: getExam,
+        },
+      });
     }
   };
 
@@ -160,14 +193,13 @@ export default function StartExam() {
                 )}
 
                 {curIndex === getExam.length - 1 && (
-                  <Link
-                    to={`/submit-review/id=${id}`}
-                    state={{ answers: answer, getExam: getExam }}
+                  <button
+                    onClick={handleSubmit}
+                    type="submit"
+                    className={styles.btn}
                   >
-                    <button type="submit" className={styles.btn}>
-                      Submit & Review
-                    </button>
-                  </Link>
+                    Submit & Review
+                  </button>
                 )}
               </div>
             </form>

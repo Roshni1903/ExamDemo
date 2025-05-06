@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 import styles from "./submitReview.module.css";
 import { toast, ToastContainer } from "react-toastify";
 import instance from "/src/component/axiosInstance.jsx";
-
+import LoadingSpinner from "/src/component/LoadingSpinner/LoadingSpinner.jsx";
 export default function SubmitReview() {
   const [review, setReview] = useState([]);
   const [loading, setLoading] = useState(false);
   const [editable, setEditable] = useState(null);
   const location = useLocation();
+  const navigate = useNavigate();
   const { answers, getExam } = location.state;
   const { id } = useParams();
   const token = localStorage.getItem("token");
@@ -20,8 +21,7 @@ export default function SubmitReview() {
     setReview(reviewData);
   }, [answers, getExam]);
 
-  const handleRadio = (e, questionId, newAnswer) => {
-    e.preventDefault();
+  const handleRadio = (questionId, newAnswer) => {
     setReview((prev) =>
       prev.map((item) =>
         item._id === questionId ? { ...item, selectedAns: newAnswer } : item
@@ -52,31 +52,49 @@ export default function SubmitReview() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const data = [];
-    review.map((element) => {
-      data.push({ question: element._id, answer: element.selectedAns });
-    });
-    console.log(data);
+    const data = review.map((element) => ({
+      question: element._id,
+      answer: element.selectedAns,
+    }));
+
     try {
+      setLoading(true);
+
       const response = await instance({
-        url: `student/giveExam?${id}`,
+        url: `student/giveExam?id=${id}`,
         method: "POST",
         headers: {
           "access-token": token,
         },
         data,
       });
-      console.log(response);
-      // if (response.data.statusCode === 200) {
-      //   toast(response.data.message, {
-      //     position: "top-center",
-      //     autoClose: 1000,
-      //   });
-      // }
+
+      if (response.data.statusCode === 200) {
+        toast.success(response.data.message, {
+          position: "top-center",
+          autoClose: 1000,
+        });
+
+        setTimeout(() => {
+          navigate("/student/dashboard", { state: { refresh: Date.now() } });
+        }, 1200);
+      } else {
+        toast.error(response.data.message || "Submission failed", {
+          position: "top-center",
+          autoClose: 1000,
+        });
+        setLoading(false);
+      }
     } catch (e) {
-      console.log(e);
+      // console.error(e);
+      toast.error("Something went wrong!", {
+        position: "top-center",
+        autoClose: 1000,
+      });
+      setLoading(false);
     }
   };
+
   return (
     <>
       <ToastContainer />
@@ -109,7 +127,7 @@ export default function SubmitReview() {
                           value={opt}
                           checked={item.selectedAns === opt}
                           disabled={editable !== item._id}
-                          onChange={(e) => handleRadio(e, item._id, opt)}
+                          onChange={(e) => handleRadio(item._id, opt)}
                         />
                         {opt}
                       </label>
@@ -118,13 +136,14 @@ export default function SubmitReview() {
                   <div className={styles.btnContainer}>
                     <button
                       onClick={(e) => handleSave(e)}
-                      className={styles.edit}
+                      className={styles.btn}
+                      disabled={editable !== item._id}
                     >
                       Save
                     </button>
                     <button
                       onClick={(e) => handleEdit(e, item?._id)}
-                      className={styles.edit}
+                      className={styles.btn}
                     >
                       Edit
                     </button>

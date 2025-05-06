@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 import instance from "/src/component/axiosInstance.jsx";
 import LoadingSpinner from "/src/component/LoadingSpinner/LoadingSpinner.jsx";
+// import { useLocation } from "react-router-dom";
 import styles from "./student.module.css";
 import { Link } from "react-router-dom";
 export default function StudentDashboard() {
   const token = localStorage.getItem("token");
   const [allExam, setAllExam] = useState([]);
   const [loading, setLoading] = useState(false);
+  // const location = useLocation();
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -20,12 +23,16 @@ export default function StudentDashboard() {
         setAllExam(response.data.data);
         setLoading(false);
       } catch (e) {
-        console.log(e);
+        toast.error("Something went wrong!", {
+          position: "top-center",
+          autoClose: 1000,
+        });
+        setLoading(false);
       }
+      setLoading(false);
     };
     if (token) {
       fetchData();
-      setLoading(false);
     }
   }, []);
 
@@ -41,7 +48,7 @@ export default function StudentDashboard() {
             <thead>
               <tr>
                 <th>Subject Name</th>
-                <th colSpan={2}>Notes</th>
+                <th>Notes</th>
                 <th>Actions</th>
                 <th>Score</th>
                 <th>Rank</th>
@@ -53,9 +60,14 @@ export default function StudentDashboard() {
               {allExam.map((element) => (
                 <tr key={element._id}>
                   <td>{element.subjectName}</td>
-                  {element.notes.map((noteElement) => {
-                    return <td>{noteElement}</td>;
-                  })}
+                  {/* {element.notes.map((noteElement) => {
+                                        return <td>{noteElement}</td>;
+                                    })} */}
+                  <td>
+                    {element.notes.map((note, index) => (
+                      <li key={index}>{note}</li>
+                    ))}
+                  </td>
                   <td>
                     <div className={styles.actions}>
                       <Link to={`/start-exam/${element._id}`}>
@@ -69,15 +81,19 @@ export default function StudentDashboard() {
                       </Link>
                     </div>
                   </td>
-                  {element?.Result?.map((resultElement) => {
-                    return (
-                      <>
-                        <td>{resultElement.score}</td>
-                        <td>{resultElement.rank}</td>
-                        <td>{resultElement.resultStatus}</td>
-                      </>
-                    );
-                  })}
+                  {element.Result.length > 0 ? (
+                    <>
+                      <td>{element.Result[0].score}</td>
+                      <td>{element.Result[0].rank}</td>
+                      <td>{element.Result[0].resultStatus}</td>
+                    </>
+                  ) : (
+                    <>
+                      <td>-</td>
+                      <td>-</td>
+                      <td>-</td>
+                    </>
+                  )}
                 </tr>
               ))}
             </tbody>

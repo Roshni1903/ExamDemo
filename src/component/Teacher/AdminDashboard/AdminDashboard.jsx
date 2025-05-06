@@ -70,6 +70,10 @@ export default function AdminDashboard() {
         <div className={styles.spinnerContainer}>
           <LoadingSpinner />
         </div>
+      ) : exams?.length === 0 ? (
+        <h2 style={{ marginLeft: "300px" }}>
+          No exam found to display create first..
+        </h2>
       ) : (
         <div className={styles.container}>
           <h1>All Exams</h1>
@@ -82,7 +86,7 @@ export default function AdminDashboard() {
               </tr>
             </thead>
             <tbody>
-              {exams.map((examElement) => (
+              {exams?.map((examElement) => (
                 <tr key={examElement._id}>
                   <td>{examElement.subjectName}</td>
                   <td>{examElement.notes}</td>
