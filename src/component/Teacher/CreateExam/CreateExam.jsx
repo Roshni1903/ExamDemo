@@ -116,6 +116,7 @@ export default function CreateExam() {
 
   const handleRadio = (index) => {
     const update = [...question];
+    // console.log((update[curIndex].answer = index));
     update[curIndex].answer = index;
     setQuestion(update);
     validate("answer", update[curIndex].options[index]);

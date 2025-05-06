@@ -4,7 +4,6 @@ import instance from "/src/component/axiosInstance.jsx";
 import styles from "./editExam.module.css";
 import LoadingSpinner from "/src/component/LoadingSpinner/LoadingSpinner.jsx";
 import { toast, ToastContainer } from "react-toastify";
-import SideBar from "../../CommonUser/SideBar";
 
 export default function EditExam() {
   const role = localStorage.getItem("role");
@@ -21,6 +20,7 @@ export default function EditExam() {
     quesError: "",
     optionError: "",
     answerError: "",
+    notesError: "",
   });
   const [edit, setEdit] = useState(false);
 
@@ -55,7 +55,11 @@ export default function EditExam() {
         }
         setLoading(false);
       } catch (e) {
-        console.log(e);
+        // console.log(e);
+        toast.error("something went wrong!", {
+          position: "top-center",
+          autoClose: 1000,
+        });
       }
     };
 
@@ -80,13 +84,16 @@ export default function EditExam() {
 
       if (currentQuestion.answer === "") {
         newErrors.answerError = "Please select a correct answer";
+      } else {
+        newErrors.answerError = "";
       }
       if (subjectName === "") {
         newErrors.subjectError = "Please select subject";
       }
-      const notesError = Object.values(notes).some((element) => element === "");
-      if (notesError) {
-        newErrors.notesError = "Please enter notes NA if not applicable";
+      if (notes.some((note) => note === "")) {
+        newErrors.notesError = "Please add valid note.";
+      } else {
+        newErrors.notesError = "";
       }
     } else {
       switch (name) {
@@ -97,10 +104,9 @@ export default function EditExam() {
           newErrors.optionError =
             value === "" ? "All options are required" : "";
           break;
-        case "answer":
-          newErrors.answerError =
-            value === "" ? "Select one correct answer!" : "";
-          break;
+        // case "answer":
+        //     newErrors.answerError = value === "" ? "Select one correct answer!" : "";
+        //     break;
         case "subject":
           newErrors.subjectError = value === "" ? "Please select subject!" : "";
           break;
@@ -115,20 +121,20 @@ export default function EditExam() {
     setError(newErrors);
     return newErrors;
   };
-
   const checkExisting = () => {
     let include;
     const quesValue = question[curIndex].question;
     const optionValue = question[curIndex].options;
-    question.forEach((element, index) => {
-      if (element.question.includes(quesValue) && curIndex !== index) {
-        include = true;
-      }
-    });
+    const isDuplicateQuestion = question.some(
+      (q, index) => index !== curIndex && q.question.toLowerCase() === quesValue
+    );
+    if (isDuplicateQuestion) {
+      include = true;
+      return include;
+    }
     new Set(optionValue).size !== optionValue.length ? (include = true) : null;
     return include;
   };
-
   const handleQuesChange = (e) => {
     const { value } = e.target;
     const update = [...question];
@@ -140,30 +146,30 @@ export default function EditExam() {
 
   const handleOptionChange = (e, index) => {
     const { value } = e.target;
-    const update = [...question];
+    const updatedQuestions = [...question];
+    const currentQuestion = updatedQuestions[curIndex];
 
-    if (update[curIndex].answer === update[curIndex].options[index]) {
-      update[curIndex].answer = value;
-    }
+    currentQuestion.options[index] = value;
 
-    update[curIndex].options[index] = value;
+    setQuestion(updatedQuestions);
 
-    setQuestion(update);
     validate("option-text", value);
     setEdit(true);
   };
 
-  const handleAnswerChange = (option) => {
+  const handleRadio = (index) => {
     const update = [...question];
-    update[curIndex].answer = option;
+
+    update[curIndex].answer = index;
+
     setQuestion(update);
-    validate("answer", option);
+    validate("answer", update[curIndex].options[index]);
   };
 
-  const handlePrevious = (e) => {
+  const handlePrevious = () => {
     if (edit) {
       toast.error(
-        "Please save  changes before moving to the previous question.",
+        "Please save changes before moving to the previous question.",
         {
           position: "top-center",
           autoClose: 1000,
@@ -175,7 +181,6 @@ export default function EditExam() {
       setCurIndex(curIndex - 1);
     }
   };
-
   const handleSubject = (e) => {
     const { name, value } = e.target;
     setSubject(e.target.value);
@@ -189,6 +194,7 @@ export default function EditExam() {
     setNotes([...notes, ""]);
   };
   const handleNotes = (e, index) => {
+    const { name, value } = e.target;
     const updateNotes = [...notes];
     updateNotes[index] = e.target.value;
     setNotes(updateNotes);
@@ -206,6 +212,7 @@ export default function EditExam() {
 
     const validationErrors = validate("allfield");
     if (Object.values(validationErrors).some((err) => err !== "")) return;
+    checkExisting();
 
     if (edit) {
       toast.error("Please save the changes before proceeding.", {
@@ -282,15 +289,15 @@ export default function EditExam() {
         navigate("/dashboard");
       }
     } catch (e) {
-      toast.error("something went wrong!", {
+      toast.error("Atleast one note is required and note can be empty!", {
         position: "top-center",
         autoClose: 1000,
       });
     }
   };
+  // console.log(question[curIndex].options[question[curIndex].answer]);
   return (
     <>
-      <SideBar role={role} />
       {loading ? (
         <div className={styles.spinnerContainer}>
           <LoadingSpinner />
@@ -331,9 +338,15 @@ export default function EditExam() {
                     <input
                       type="radio"
                       name={`question-${curIndex}`}
-                      value={opt}
-                      checked={question[curIndex].answer === opt}
-                      onChange={() => handleAnswerChange(opt)}
+                      value={index}
+                      checked={
+                        // question[curIndex].options[question[curIndex].answer]
+                        question[curIndex].answer === index
+                      }
+                      onChange={() => handleRadio(index)}
+                      // value={opt}
+                      // checked={question[curIndex].answer === opt}
+                      // onChange={() => handleRadio(opt)}
                     />
                     <input
                       type="text"
@@ -350,7 +363,8 @@ export default function EditExam() {
                 <input
                   name="answer"
                   type="text"
-                  value={question[curIndex].answer}
+                  // value={question[curIndex].answer}
+                  value={question[curIndex].options[question[curIndex].answer]}
                   placeholder="Select correct answer from above"
                   readOnly
                 />
@@ -400,6 +414,7 @@ export default function EditExam() {
                     <div key={index} className={styles.note}>
                       <input
                         type="text"
+                        name="notes"
                         value={element}
                         placeholder="Enter notes"
                         onChange={(e) => handleNotes(e, index)}
@@ -410,7 +425,11 @@ export default function EditExam() {
                     </div>
                   );
                 })}
-                <button onClick={addNotes}>Add Notes</button>
+                <ErrorContainer error={error.notesError} />
+
+                <button type="button" onClick={addNotes}>
+                  Add Notes
+                </button>
               </>
             )}
           </form>
@@ -427,3 +446,7 @@ const ErrorContainer = ({ error }) => {
     return null;
   }
 };
+
+//check bug and answer bug
+// checked={question[curIndex].answer === opt}
+// onChange={() => handleAnswerChange(opt, index)}
