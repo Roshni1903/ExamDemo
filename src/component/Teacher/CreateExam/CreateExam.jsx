@@ -80,18 +80,21 @@ export default function CreateExam() {
   };
 
   const checkExisting = () => {
-    let include;
+    let includeQues;
+    let includeAnswer;
     const quesValue = question[curIndex].question;
     const optionValue = question[curIndex].options;
     const isDuplicateQuestion = question.some(
       (q, index) => index !== curIndex && q.question.toLowerCase() === quesValue
     );
     if (isDuplicateQuestion) {
-      include = true;
-      return include;
+      includeQues = true;
+      // return includeQues;
     }
-    new Set(optionValue).size !== optionValue.length ? (include = true) : null;
-    return include;
+    new Set(optionValue).size !== optionValue.length
+      ? (includeAnswer = true)
+      : null;
+    return [includeQues, includeAnswer];
   };
 
   const handleQuesChange = (e) => {
@@ -100,6 +103,7 @@ export default function CreateExam() {
     update[curIndex].question = value;
     setQuestion(update);
     validate("question", value);
+    // const [includeQues,includeAnswer]
     setEdit(true);
   };
 
@@ -132,13 +136,10 @@ export default function CreateExam() {
 
   const handlePrevious = (e) => {
     if (edit) {
-      toast.error(
-        "Please save  changes before moving to the previous question.",
-        {
-          position: "top-center",
-          autoClose: 1000,
-        }
-      );
+      toast("Please save  changes before moving to the previous question.", {
+        position: "top-center",
+        autoClose: 1000,
+      });
       return;
     }
     if (curIndex > 0) {
@@ -161,7 +162,7 @@ export default function CreateExam() {
     // }
 
     if (edit) {
-      toast.error("Please save the changes before proceeding.", {
+      toast("Please save the changes before proceeding.", {
         position: "top-center",
         autoClose: 1000,
       });
@@ -195,20 +196,27 @@ export default function CreateExam() {
     e.preventDefault();
     const validationErrors = validate("allfield");
     if (Object.values(validationErrors).some((err) => err !== "")) return;
-    const include = checkExisting();
-    if (include) {
-      toast("Question already included or any of the options are same", {
+    const [includeQues, includeAnswer] = checkExisting();
+    // console.log(include);
+    if (includeQues) {
+      toast("Question already included!", {
         autoClose: 1000,
         position: "top-center",
       });
       return;
-    } else {
-      setEdit(false);
-      toast.success("saved successfully!", {
-        position: "top-center",
-        autoClose: 1000,
-      });
     }
+    if (includeAnswer) {
+      toast("Same option cant be included!", {
+        autoClose: 1000,
+        position: "top-center",
+      });
+      return;
+    }
+    setEdit(false);
+    toast.success("saved successfully!", {
+      position: "top-center",
+      autoClose: 1000,
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -218,7 +226,7 @@ export default function CreateExam() {
     const validationErrors = validate("allfield");
     if (Object.values(validationErrors).some((err) => err !== "")) return;
     if (edit) {
-      toast.error("Please save  changes before submitting.", {
+      toast("Please save  changes before submitting.", {
         position: "top-center",
         autoClose: 1000,
       });
@@ -244,22 +252,40 @@ export default function CreateExam() {
         },
       });
       // console.log(response);
-      if (response.data.message) {
-        toast(response.data.message, {
+      //   if (response.data.message) {
+      //     toast(response.data.message, {
+      //       position: "top-center",
+      //       autoClose: 1000,
+      //     });
+      //   }
+      //   if (response.data.statusCode === 200) {
+      //     navigate("/teacher/dashboard");
+      //     setLoading(false);
+      //   }
+      // } catch (e) {
+      //   toast("Any blank field cant be submitted!", {
+      //     position: "top-center",
+      //     autoClose: 1000,
+      //   });
+      //   setLoading(false);
+      // }
+      if (response.data.statusCode === 200) {
+        toast.success(response.data.message, {
           position: "top-center",
           autoClose: 1000,
         });
-      }
-      if (response.data.statusCode === 200) {
-        navigate("/teacher/dashboard");
-        setLoading(false);
+
+        setTimeout(() => {
+          navigate("/teacher/dashboard");
+        }, 1000);
       }
     } catch (e) {
-      toast.error("Any blank field cant be submitted!", {
+      toast.error("Something went wrong!", {
         position: "top-center",
-        autoClose: 1000,
+        autoClose: 2000,
       });
     }
+    setLoading(false);
   };
 
   return (
@@ -414,16 +440,4 @@ const ErrorContainer = ({ error }) => {
   }
 };
 
-// if (
-//   currentQuestion.answer === index &&
-//   (value === "" ||
-//     currentQuestion.options.filter((opt) => opt === value).length > 1)
-// ) {
-//   currentQuestion.answer = null;
-// }
-// if (
-//   typeof currentQuestion.answer === "number" &&
-//   currentQuestion.options[currentQuestion.answer]
-// ) {
-//   setError((prev) => ({ ...prev, answerError: "" }));
-// }
+// check existing on chnge handle question,option toast
