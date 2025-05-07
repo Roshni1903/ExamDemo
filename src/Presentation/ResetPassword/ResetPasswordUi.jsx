@@ -9,7 +9,7 @@ export default function ResetPasswordUi({ desc }) {
   return (
     <div className={styles.flex}>
       <ToastContainer />
-      <h1>set new password</h1>
+      <h1>Set New Password</h1>
       <form className={styles.inner}>
         {desc.map((element) => {
           return FormUi(element, data, error, handleChange);

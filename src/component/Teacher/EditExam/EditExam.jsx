@@ -62,8 +62,8 @@ export default function EditExam() {
       }
     };
 
-    if (token) fetchData();
-  }, [id, token]);
+    if (id) fetchData();
+  }, [id]);
 
   const validate = (name, value) => {
     const newErrors = { ...error };
@@ -187,7 +187,6 @@ export default function EditExam() {
     }
     if (curIndex > 0) setCurIndex(curIndex - 1);
   };
-  // question[curindex].length
   const handleNext = (e) => {
     e.preventDefault();
 

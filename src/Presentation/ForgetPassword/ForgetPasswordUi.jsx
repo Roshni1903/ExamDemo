@@ -10,7 +10,7 @@ export default function ForgetPasswordUi({ desc }) {
   return (
     <div className={styles.flex}>
       <ToastContainer />
-      <h1>Change password</h1>
+      <h1>Change Password</h1>
       <form className={styles.inner}>
         {desc.map((element) => {
           return FormUi(element, data, error, handleChange);

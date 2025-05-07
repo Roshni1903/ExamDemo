@@ -51,20 +51,17 @@ export default function StartExam() {
 
   const handleNext = () => {
     if (edit) {
-      toast.error("Please save changes before moving to the next question.", {
+      toast("Please save changes before moving to the next question.", {
         position: "top-center",
         autoClose: 1000,
       });
       return;
     }
     if (!answer[curIndex] || !answer[curIndex].answer) {
-      toast.error(
-        "Please select an option before moving to the next question.",
-        {
-          position: "top-center",
-          autoClose: 1000,
-        }
-      );
+      toast("Please select an option before moving to the next question.", {
+        position: "top-center",
+        autoClose: 1000,
+      });
       return;
     }
     setCurIndex((prev) => prev + 1);
@@ -72,31 +69,25 @@ export default function StartExam() {
 
   const handlePrevious = () => {
     if (edit) {
-      toast.error(
-        "Please save changes before moving to the previous question.",
-        {
-          position: "top-center",
-          autoClose: 1000,
-        }
-      );
+      toast("Please save changes before moving to the previous question.", {
+        position: "top-center",
+        autoClose: 1000,
+      });
       return;
     }
-    if (!answer[curIndex] || !answer[curIndex].answer) {
-      toast.error(
-        "Please select an option before moving to the next question.",
-        {
-          position: "top-center",
-          autoClose: 1000,
-        }
-      );
-      return;
-    }
+    // if (!answer[curIndex] || !answer[curIndex].answer) {
+    //   toast("Please select an option before moving to the next question.", {
+    //     position: "top-center",
+    //     autoClose: 1000,
+    //   });
+    //   return;
+    // }
     setCurIndex((prev) => prev - 1);
   };
 
   const saveChanges = () => {
     if (!answer[curIndex] || !answer[curIndex].answer) {
-      toast.error("Please select an option before saving.", {
+      toast("Please select an option before saving.", {
         position: "top-center",
         autoClose: 1000,
       });
@@ -112,8 +103,15 @@ export default function StartExam() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!answer[curIndex] || !answer[curIndex].answer) {
+      toast("Please select an option before submitting.", {
+        position: "top-center",
+        autoClose: 1000,
+      });
+      return;
+    }
     if (edit) {
-      toast.error("Please save changes before submit.", {
+      toast("Please save changes before submit.", {
         position: "top-center",
         autoClose: 1000,
       });

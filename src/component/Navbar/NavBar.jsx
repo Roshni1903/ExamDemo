@@ -25,7 +25,7 @@ const Navbar = () => {
           <>
             {role === "teacher" ? (
               <Link className={styles.link} to="/create-exam">
-                <button className={styles.btn}> Create+ </button>
+                <button className={styles.btn}> Create Exam+ </button>
               </Link>
             ) : null}
             <Link className={styles.link} to="/">

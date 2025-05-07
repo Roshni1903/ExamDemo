@@ -1,13 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast, ToastContainer } from "react-toastify";
-import styles from "./createExam.module.css";
+import styles from "/Users/tagline/Documents/project/react-exam/src/component/Teacher/CreateExam/createExam.module.css";
 import instance from "/src/component/axiosInstance.jsx";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import LoadingSpinner from "/src/component/LoadingSpinner/LoadingSpinner.jsx";
 
-import SideBar from "../../CommonUser/SideBar";
 export default function CreateExam() {
-  const role = localStorage.getItem("role");
+  const token = localStorage.getItem("token");
+  const { id } = useParams();
   const navigate = useNavigate();
   const createEmptyQuestion = () => ({
     question: "",
@@ -15,7 +15,7 @@ export default function CreateExam() {
     options: ["", "", "", ""],
   });
   const [loading, setLoading] = useState(false);
-  const [subject, setSubject] = useState("");
+  const [subjectName, setSubject] = useState("");
   const [curIndex, setCurIndex] = useState(0);
   const [question, setQuestion] = useState([createEmptyQuestion()]);
   const [notes, setNotes] = useState([""]);
@@ -27,6 +27,49 @@ export default function CreateExam() {
     notesError: "",
   });
   const [edit, setEdit] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const response = await instance.get(
+          `dashboard/Teachers/examDetail?id=${id}`,
+          {
+            headers: { "access-token": token },
+          }
+        );
+
+        if (response.data.statusCode === 200) {
+          const updatedQuestions = response.data.data.questions.map((q) => {
+            const index = q.options.findIndex((opt) => opt === q.answer);
+            return { ...q, answer: index !== -1 ? index : null };
+          });
+          setQuestion(updatedQuestions);
+        }
+
+        const examDetails = await instance.get(`dashboard/Teachers/viewExam`, {
+          headers: { "access-token": token },
+        });
+        const examList = examDetails.data.data;
+        const matchid = examList.find((element) => id === element._id);
+        if (matchid) {
+          setSubject(matchid.subjectName);
+          setNotes(matchid.notes);
+        }
+
+        setLoading(false);
+      } catch (e) {
+        toast.error("Something went wrong!", {
+          position: "top-center",
+          autoClose: 1000,
+        });
+        setLoading(false);
+      }
+    };
+
+    if (token) fetchData();
+  }, [id, token]);
+
   const validate = (name, value) => {
     const newErrors = { ...error };
     if (name === "allfield") {
@@ -44,14 +87,14 @@ export default function CreateExam() {
       if (currentQuestion.answer === null) {
         newErrors.answerError = "Please select a correct answer";
       }
-      if (subject === "") {
+      if (subjectName === "") {
         newErrors.subjectError = "Please select subject";
       }
-      // if (notes.length === 0 || notes.some(note => note.trim() === "")) {
+      //   if (notes.length === 0 || notes.some((note) => note.trim() === "")) {
       //     newErrors.notesError = "Please add at least one valid note.";
-      // } else {
+      //   } else {
       //     newErrors.notesError = "";
-      // }
+      //   }
     } else {
       switch (name) {
         case "question":
@@ -89,7 +132,6 @@ export default function CreateExam() {
     );
     if (isDuplicateQuestion) {
       includeQues = true;
-      // return includeQues;
     }
     new Set(optionValue).size !== optionValue.length
       ? (includeAnswer = true)
@@ -124,6 +166,7 @@ export default function CreateExam() {
     update[curIndex].answer = index;
     setQuestion(update);
     validate("answer", update[curIndex].options[index]);
+    setEdit(true);
   };
 
   const handleSubject = (e) => {
@@ -144,19 +187,12 @@ export default function CreateExam() {
       setCurIndex(curIndex - 1);
     }
   };
+
   const handleNext = (e) => {
     e.preventDefault();
     const validationErrors = validate("allfield");
     if (Object.values(validationErrors).some((err) => err !== "")) return;
     const include = checkExisting();
-
-    // if (include) {
-    //   toast("Question already included or any of the options are same", {
-    //     autoClose: 1000,
-    //     position: "top-center",
-    //   });
-    //   return;
-    // }
 
     if (edit) {
       toast("Please save the changes before proceeding.", {
@@ -168,9 +204,11 @@ export default function CreateExam() {
     if (curIndex < question.length - 1) {
       setCurIndex(curIndex + 1);
     } else {
-      const updatedQuestions = [...question, createEmptyQuestion()];
-      setQuestion(updatedQuestions);
-      setCurIndex(curIndex + 1);
+      if (!id) {
+        const updatedQuestions = [...question, createEmptyQuestion()];
+        setQuestion(updatedQuestions);
+        setCurIndex(curIndex + 1);
+      }
     }
   };
 
@@ -189,6 +227,7 @@ export default function CreateExam() {
     const updateNotes = notes.filter((_, index) => index !== rindex);
     setNotes(updateNotes);
   };
+
   const saveChanges = (e) => {
     e.preventDefault();
     const validationErrors = validate("allfield");
@@ -218,6 +257,7 @@ export default function CreateExam() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    let exam;
     const token = localStorage.getItem("token");
 
     const validationErrors = validate("allfield");
@@ -229,62 +269,89 @@ export default function CreateExam() {
       });
       return;
     }
-    const exam = {
-      subjectName: subject,
-      questions: question.map((q) => ({
+    if (id) {
+      const formatQuestions = question.map((q) => ({
         ...q,
         answer: q.options[q.answer],
-      })),
-      notes: notes,
-    };
+      }));
 
-    try {
+      exam = {
+        subjectName,
+        questions: formatQuestions,
+        notes,
+      };
+    } else {
+      exam = {
+        subjectName: subjectName,
+        questions: question.map((q) => ({
+          ...q,
+          answer: q.options[q.answer],
+        })),
+        notes: notes,
+      };
+    }
+
+    if (id) {
+      try {
+        const response = await instance.put(
+          `dashboard/Teachers/editExam?id=${id}`,
+          exam,
+          { headers: { "access-token": token } }
+        );
+
+        // if (response.data.message) {
+        //   toast(response.data.message, {
+        //     position: "top-center",
+        //     autoClose: 1000,
+        //   });
+        // }
+
+        if (response.data.statusCode === 200) {
+          navigate("/dashboard");
+        }
+      } catch (e) {
+        toast(
+          "Any blank field can't be submitted and atleast one note is required!",
+          {
+            position: "top-center",
+            autoClose: 1000,
+          }
+        );
+      }
+    } else {
       setLoading(true);
-      const response = await instance({
-        url: "dashboard/Teachers/Exam",
-        method: "POST",
-        data: exam,
-        headers: {
-          "access-token": token,
-        },
-      });
-      // console.log(response);
-      //   if (response.data.message) {
-      //     toast(response.data.message, {
-      //       position: "top-center",
-      //       autoClose: 1000,
-      //     });
-      //   }
-      //   if (response.data.statusCode === 200) {
-      //     navigate("/teacher/dashboard");
-      //     setLoading(false);
-      //   }
-      // } catch (e) {
-      //   toast("Any blank field cant be submitted!", {
-      //     position: "top-center",
-      //     autoClose: 1000,
-      //   });
-      //   setLoading(false);
-      // }
-      if (response.data.statusCode === 200) {
-        toast.success(response.data.message, {
+
+      try {
+        const response = await instance({
+          url: "dashboard/Teachers/Exam",
+          method: "POST",
+          data: exam,
+          headers: {
+            "access-token": token,
+          },
+        });
+        if (response.data.statusCode === 200) {
+          console.log("inside response");
+          toast.success(response.data.message, {
+            position: "top-center",
+            autoClose: 1000,
+          });
+
+          setTimeout(() => {
+            navigate("/teacher/dashboard");
+          }, 500);
+          setLoading(false);
+        }
+      } catch (e) {
+        console.log("catch");
+        toast.error("Something went wrong", {
           position: "top-center",
           autoClose: 1000,
         });
-
-        setTimeout(() => {
-          navigate("/teacher/dashboard");
-        }, 1000);
+        setLoading(false);
       }
-    } catch (e) {
-      toast.error("Something went wrong!", {
-        position: "top-center",
-        autoClose: 2000,
-      });
     }
-    setLoading(false);
   };
-
   return (
     <>
       {loading ? (
@@ -293,17 +360,16 @@ export default function CreateExam() {
         </div>
       ) : (
         <div className={styles.flex}>
-          <SideBar role={role} />
           <ToastContainer />
           <form onSubmit={handleSubmit} className={styles.inner}>
             {curIndex === 0 && (
               <>
-                <h2>Create Exam</h2>
-                <label htmlFor="subject">Subject</label>
+                <h2>{id ? "Edit Exam" : "Create Exam"}</h2>
+                <label htmlFor="subjectName">Subject</label>
                 <input
                   type="text"
-                  value={subject}
-                  name="subject"
+                  value={subjectName}
+                  name="subjectName"
                   placeholder="Enter subject"
                   onChange={handleSubject}
                 />
@@ -329,7 +395,7 @@ export default function CreateExam() {
                     <input
                       type="radio"
                       name={`question-${curIndex}`}
-                      value={index}
+                      value={id ? null : index}
                       checked={question[curIndex].answer === index}
                       onChange={() => handleRadio(index)}
                     />
@@ -437,4 +503,4 @@ const ErrorContainer = ({ error }) => {
   }
 };
 
-// check existing on chnge handle question,option toast
+//dynamic form

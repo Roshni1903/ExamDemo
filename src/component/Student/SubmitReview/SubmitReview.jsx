@@ -28,8 +28,6 @@ export default function SubmitReview() {
       )
     );
   };
-  // console.log("review", review);
-
   const handleSave = (e) => {
     e.preventDefault();
     toast.success("Saved successfully!", {
@@ -41,7 +39,7 @@ export default function SubmitReview() {
   const handleEdit = (e, questionId) => {
     e.preventDefault();
     if (editable !== null) {
-      toast.error("Save the changes first!", {
+      toast("Save the changes first!", {
         position: "top-center",
         autoClose: 1000,
       });
