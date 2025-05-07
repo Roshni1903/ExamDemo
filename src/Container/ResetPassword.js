@@ -27,13 +27,25 @@ export default function ResetPassword() {
         },
         data,
       });
-      if (response.data.message) {
-        toast(response.data.message, {
+      console.log(response.data);
+
+      if (response.data.statusCode === 200) {
+        toast.success(response.data.message, {
           position: "top-center",
-          autoClose: 1500,
+          autoClose: 1000,
         });
-        navigate("/dashboard");
+
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 1200);
       }
+      if (response.data.statusCode === 500) {
+        toast.error(response.data.message, {
+          position: "top-center",
+          autoClose: 1000,
+        });
+      }
+
       setLoading(false);
     } catch (e) {
       toast.error("something went wrong!", {
@@ -68,3 +80,5 @@ export default function ResetPassword() {
     handleSubmit,
   };
 }
+
+// #
