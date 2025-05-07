@@ -7,10 +7,9 @@ import { toast, ToastContainer } from "react-toastify";
 
 export default function EditExam() {
   const role = localStorage.getItem("role");
-
   const navigate = useNavigate();
   const [question, setQuestion] = useState([]);
-  const [subjectName, setSubject] = useState();
+  const [subjectName, setSubject] = useState("");
   const [notes, setNotes] = useState([]);
   const [curIndex, setCurIndex] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -31,139 +30,149 @@ export default function EditExam() {
         const response = await instance.get(
           `dashboard/Teachers/examDetail?id=${id}`,
           {
-            headers: {
-              "access-token": token,
-            },
+            headers: { "access-token": token },
           }
         );
+
         if (response.data.statusCode === 200) {
-          setQuestion(response.data.data.questions);
+          const updatedQuestions = response.data.data.questions.map((q) => {
+            const index = q.options.findIndex((opt) => opt === q.answer);
+            return { ...q, answer: index !== -1 ? index : null };
+          });
+          setQuestion(updatedQuestions);
         }
+
         const examDetails = await instance.get(`dashboard/Teachers/viewExam`, {
-          headers: {
-            "access-token": token,
-          },
+          headers: { "access-token": token },
         });
         const examList = examDetails.data.data;
-        if (examDetails.data.statusCode === 200) {
-          const matchid = examList.find((element) => id === element._id);
-          if (matchid) {
-            const { subjectName, notes } = matchid;
-            setSubject(subjectName);
-            setNotes(notes);
-          }
+        const matchid = examList.find((element) => id === element._id);
+        if (matchid) {
+          setSubject(matchid.subjectName);
+          setNotes(matchid.notes);
         }
+
         setLoading(false);
       } catch (e) {
-        // console.log(e);
-        toast.error("something went wrong!", {
+        toast.error("Something went wrong!", {
           position: "top-center",
           autoClose: 1000,
         });
+        setLoading(false);
       }
     };
 
-    if (token) {
-      fetchData();
-    }
+    if (token) fetchData();
   }, [id, token]);
+
   const validate = (name, value) => {
     const newErrors = { ...error };
+    const currentQuestion = question[curIndex];
 
     if (name === "allfield") {
-      const currentQuestion = question[curIndex];
-
-      if (currentQuestion.question === "") {
+      if (!currentQuestion.question)
         newErrors.quesError = "Question is required";
-      }
+      else newErrors.quesError = "";
 
-      const emptyOption = currentQuestion.options.some((opt) => opt === "");
-      if (emptyOption) {
+      if (currentQuestion.options.some((opt) => opt.trim() === ""))
         newErrors.optionError = "All options are required";
-      }
+      else newErrors.optionError = "";
 
-      if (currentQuestion.answer === "") {
+      if (
+        currentQuestion.answer === null ||
+        currentQuestion.answer === undefined
+      )
         newErrors.answerError = "Please select a correct answer";
-      } else {
-        newErrors.answerError = "";
-      }
-      if (subjectName === "") {
-        newErrors.subjectError = "Please select subject";
-      }
-      if (notes.some((note) => note === "")) {
-        newErrors.notesError = "Please add valid note.";
-      } else {
-        newErrors.notesError = "";
-      }
-    } else {
-      switch (name) {
-        case "question":
-          newErrors.quesError = value === "" ? "Question is required" : "";
-          break;
-        case "option-text":
-          newErrors.optionError =
-            value === "" ? "All options are required" : "";
-          break;
-        // case "answer":
-        //     newErrors.answerError = value === "" ? "Select one correct answer!" : "";
-        //     break;
-        case "subject":
-          newErrors.subjectError = value === "" ? "Please select subject!" : "";
-          break;
-        case "notes":
-          newErrors.notesError =
-            value === "" ? "Please enter notes NA if not applicable" : "";
+      else newErrors.answerError = "";
 
-        default:
-          break;
-      }
+      if (!subjectName) newErrors.subjectError = "Please select subject";
+      else newErrors.subjectError = "";
+
+      // if (notes.some((note) => note.trim() === ""))
+      //   newErrors.notesError = "Please add valid note.";
+      // else newErrors.notesError = "";
+    } else {
+      if (name === "question")
+        newErrors.quesError = value === "" ? "Question is required" : "";
+      if (name === "option-text")
+        newErrors.optionError = value === "" ? "All options are required" : "";
+      if (name === "subject")
+        newErrors.subjectError = value === "" ? "Please select subject!" : "";
+      if (name === "notes")
+        newErrors.notesError = value === "" ? "Note cannot be empty" : "";
     }
+
     setError(newErrors);
     return newErrors;
   };
+
   const checkExisting = () => {
-    let include;
-    const quesValue = question[curIndex].question;
+    let include = false;
+    const quesValue = question[curIndex].question.toLowerCase();
     const optionValue = question[curIndex].options;
-    const isDuplicateQuestion = question.some(
+
+    const DuplicateQuestion = question.some(
       (q, index) => index !== curIndex && q.question.toLowerCase() === quesValue
     );
-    if (isDuplicateQuestion) {
+    if (DuplicateQuestion) {
       include = true;
-      return include;
     }
-    new Set(optionValue).size !== optionValue.length ? (include = true) : null;
+
+    if (new Set(optionValue).size !== optionValue.length) {
+      include = true;
+    }
+
     return include;
   };
+
   const handleQuesChange = (e) => {
     const { value } = e.target;
-    const update = [...question];
-    update[curIndex].question = value;
-    setQuestion(update);
+    const updated = [...question];
+    updated[curIndex].question = value;
+    setQuestion(updated);
     validate("question", value);
     setEdit(true);
   };
 
   const handleOptionChange = (e, index) => {
     const { value } = e.target;
-    const updatedQuestions = [...question];
-    const currentQuestion = updatedQuestions[curIndex];
-
-    currentQuestion.options[index] = value;
-
-    setQuestion(updatedQuestions);
-
+    const updated = [...question];
+    updated[curIndex].options[index] = value;
+    setQuestion(updated);
     validate("option-text", value);
     setEdit(true);
   };
 
   const handleRadio = (index) => {
-    const update = [...question];
+    const updated = [...question];
+    updated[curIndex].answer = index;
+    setQuestion(updated);
+    setEdit(true);
+  };
 
-    update[curIndex].answer = index;
+  const handleSubject = (e) => {
+    const { value } = e.target;
+    setSubject(value);
+    validate("subject", value);
+    setEdit(true);
+  };
 
-    setQuestion(update);
-    validate("answer", update[curIndex].options[index]);
+  const handleNotes = (e, index) => {
+    const { value } = e.target;
+    const updatedNotes = [...notes];
+    updatedNotes[index] = value;
+    setNotes(updatedNotes);
+    validate("notes", value);
+    setEdit(true);
+  };
+
+  const deleteNote = (index) => {
+    const updated = notes.filter((_, i) => i !== index);
+    setNotes(updated);
+  };
+
+  const addNotes = () => {
+    setNotes([...notes, ""]);
   };
 
   const handlePrevious = () => {
@@ -177,42 +186,14 @@ export default function EditExam() {
       );
       return;
     }
-    if (curIndex > 0) {
-      setCurIndex(curIndex - 1);
-    }
+    if (curIndex > 0) setCurIndex(curIndex - 1);
   };
-  const handleSubject = (e) => {
-    const { name, value } = e.target;
-    setSubject(e.target.value);
-    validate(name, value);
-    setEdit(true);
-  };
-
-  //NOTES
-
-  const addNotes = () => {
-    setNotes([...notes, ""]);
-  };
-  const handleNotes = (e, index) => {
-    const { name, value } = e.target;
-    const updateNotes = [...notes];
-    updateNotes[index] = e.target.value;
-    setNotes(updateNotes);
-    validate(name, value);
-
-    setEdit(true);
-  };
-  const deleteNote = (rindex) => {
-    const updateNotes = notes.filter((_, index) => index !== rindex);
-    setNotes(updateNotes);
-  };
-
+  // question[curindex].length
   const handleNext = (e) => {
     e.preventDefault();
 
     const validationErrors = validate("allfield");
     if (Object.values(validationErrors).some((err) => err !== "")) return;
-    checkExisting();
 
     if (edit) {
       toast.error("Please save the changes before proceeding.", {
@@ -222,9 +203,7 @@ export default function EditExam() {
       return;
     }
 
-    if (curIndex < question.length - 1) {
-      setCurIndex(curIndex + 1);
-    }
+    setCurIndex(curIndex + 1);
   };
 
   const saveChanges = (e) => {
@@ -233,9 +212,8 @@ export default function EditExam() {
     const validationErrors = validate("allfield");
     if (Object.values(validationErrors).some((err) => err !== "")) return;
 
-    const include = checkExisting();
-    if (include) {
-      toast("Question already included or any of the options are the same", {
+    if (checkExisting()) {
+      toast("Question already included or any of the options are same", {
         autoClose: 1000,
         position: "top-center",
       });
@@ -251,65 +229,71 @@ export default function EditExam() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem("token");
+
     const validationErrors = validate("allfield");
     if (Object.values(validationErrors).some((err) => err !== "")) return;
+
     if (edit) {
-      toast.error(
-        "Please save  changes before moving to the previous question.",
-        {
-          position: "top-center",
-          autoClose: 1000,
-        }
-      );
+      toast.error("Please save changes before submitting.", {
+        position: "top-center",
+        autoClose: 1000,
+      });
       return;
     }
+
+    const formatQuestions = question.map((q) => ({
+      ...q,
+      answer: q.options[q.answer],
+    }));
+
     const exam = {
-      subjectName: subjectName,
-      questions: question,
-      notes: notes,
+      subjectName,
+      questions: formatQuestions,
+      notes,
     };
+
     try {
-      const response = await instance({
-        url: `dashboard/Teachers/editExam?id=${id}`,
-        method: "PUT",
-        data: exam,
-        headers: {
-          "access-token": token,
-        },
-      });
-      console.log(response);
+      const response = await instance.put(
+        `dashboard/Teachers/editExam?id=${id}`,
+        exam,
+        { headers: { "access-token": token } }
+      );
+
       if (response.data.message) {
         toast(response.data.message, {
           position: "top-center",
           autoClose: 1000,
         });
       }
+
       if (response.data.statusCode === 200) {
         navigate("/dashboard");
       }
     } catch (e) {
-      toast.error("Atleast one note is required and note can be empty!", {
-        position: "top-center",
-        autoClose: 1000,
-      });
+      toast.error(
+        "Any blank field can't be submitted and atleast one note is required!",
+        {
+          position: "top-center",
+          autoClose: 1000,
+        }
+      );
     }
   };
-  // console.log(question[curIndex].options[question[curIndex].answer]);
+
   return (
     <>
+      <ToastContainer />
       {loading ? (
         <div className={styles.spinnerContainer}>
           <LoadingSpinner />
         </div>
       ) : (
         <div className={styles.flex}>
-          <ToastContainer />
           <form onSubmit={handleSubmit} className={styles.inner}>
             {curIndex === 0 && (
               <>
                 <h2>Edit Exam</h2>
-                <label htmlFor="subject">Subject</label>
+                <label>Subject</label>
                 <input
                   type="text"
                   value={subjectName}
@@ -320,14 +304,15 @@ export default function EditExam() {
                 <ErrorContainer error={error.subjectError} />
               </>
             )}
+
             {question.length > 0 && (
               <>
-                <label htmlFor="question">Question {curIndex + 1}</label>
+                <label>Question {curIndex + 1}</label>
                 <input
                   type="text"
                   name="question"
-                  placeholder={`Enter question ${curIndex + 1}`}
                   value={question[curIndex].question}
+                  placeholder={`Enter question ${curIndex + 1}`}
                   onChange={handleQuesChange}
                 />
                 <ErrorContainer error={error.quesError} />
@@ -338,15 +323,8 @@ export default function EditExam() {
                     <input
                       type="radio"
                       name={`question-${curIndex}`}
-                      value={index}
-                      checked={
-                        // question[curIndex].options[question[curIndex].answer]
-                        question[curIndex].answer === index
-                      }
+                      checked={question[curIndex].answer === index}
                       onChange={() => handleRadio(index)}
-                      // value={opt}
-                      // checked={question[curIndex].answer === opt}
-                      // onChange={() => handleRadio(opt)}
                     />
                     <input
                       type="text"
@@ -363,12 +341,15 @@ export default function EditExam() {
                 <input
                   name="answer"
                   type="text"
-                  // value={question[curIndex].answer}
-                  value={question[curIndex].options[question[curIndex].answer]}
-                  placeholder="Select correct answer from above"
                   readOnly
+                  value={
+                    question[curIndex].answer !== null
+                      ? // question[curIndex].options[question[curIndex].answer]
+                        question[curIndex].options[question[curIndex].answer]
+                      : ""
+                  }
+                  placeholder="select correct answer from above"
                 />
-
                 <ErrorContainer error={error.answerError} />
               </>
             )}
@@ -385,48 +366,43 @@ export default function EditExam() {
               <button
                 type="button"
                 className={styles.btn}
-                onClick={(e) => saveChanges(e)}
+                onClick={saveChanges}
               >
                 Save
               </button>
-
               {curIndex < question.length - 1 ? (
-                <>
-                  <button
-                    type="button"
-                    className={styles.btn}
-                    onClick={handleNext}
-                  >
-                    Next
-                  </button>
-                </>
+                <button
+                  type="button"
+                  className={styles.btn}
+                  onClick={handleNext}
+                >
+                  Next
+                </button>
               ) : (
                 <button type="submit" className={styles.btn}>
                   Submit
                 </button>
               )}
             </div>
+
             {curIndex === 14 && (
               <>
-                <label htmlFor="notes">Add notes</label>
-                {notes.map((element, index) => {
-                  return (
-                    <div key={index} className={styles.note}>
-                      <input
-                        type="text"
-                        name="notes"
-                        value={element}
-                        placeholder="Enter notes"
-                        onChange={(e) => handleNotes(e, index)}
-                      />
-                      <button type="button" onClick={() => deleteNote(index)}>
-                        X
-                      </button>
-                    </div>
-                  );
-                })}
+                <label>Add Notes</label>
+                {notes.map((note, index) => (
+                  <div key={index} className={styles.note}>
+                    <input
+                      type="text"
+                      name="notes"
+                      value={note}
+                      placeholder="Enter notes"
+                      onChange={(e) => handleNotes(e, index)}
+                    />
+                    <button type="button" onClick={() => deleteNote(index)}>
+                      X
+                    </button>
+                  </div>
+                ))}
                 <ErrorContainer error={error.notesError} />
-
                 <button type="button" onClick={addNotes}>
                   Add Notes
                 </button>
@@ -439,14 +415,5 @@ export default function EditExam() {
   );
 }
 
-const ErrorContainer = ({ error }) => {
-  if (error) {
-    return <span style={{ color: "red" }}>{error}</span>;
-  } else {
-    return null;
-  }
-};
-
-//check bug and answer bug
-// checked={question[curIndex].answer === opt}
-// onChange={() => handleAnswerChange(opt, index)}
+const ErrorContainer = ({ error }) =>
+  error ? <span style={{ color: "red" }}>{error}</span> : null;
