@@ -69,7 +69,15 @@ input:focus {
     border: none;
     padding: 8px 15px;
     border-radius: 5px;
+    cursor: pointer;
 }
+
+.spinnerContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
+  }
 
 .optionContainer {
     display: grid;

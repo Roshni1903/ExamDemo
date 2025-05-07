@@ -3,6 +3,8 @@ import { toast, ToastContainer } from "react-toastify";
 import styles from "./createExam.module.css";
 import instance from "/src/component/axiosInstance.jsx";
 import { useNavigate } from "react-router-dom";
+import LoadingSpinner from "/src/component/LoadingSpinner/LoadingSpinner.jsx";
+
 import SideBar from "../../CommonUser/SideBar";
 export default function CreateExam() {
   const role = localStorage.getItem("role");
@@ -12,7 +14,7 @@ export default function CreateExam() {
     answer: null,
     options: ["", "", "", ""],
   });
-
+  const [loading, setLoading] = useState(false);
   const [subject, setSubject] = useState("");
   const [curIndex, setCurIndex] = useState(0);
   const [question, setQuestion] = useState([createEmptyQuestion()]);
@@ -232,6 +234,7 @@ export default function CreateExam() {
     };
 
     try {
+      setLoading(true);
       const response = await instance({
         url: "dashboard/Teachers/Exam",
         method: "POST",
@@ -249,6 +252,7 @@ export default function CreateExam() {
       }
       if (response.data.statusCode === 200) {
         navigate("/teacher/dashboard");
+        setLoading(false);
       }
     } catch (e) {
       toast.error("Any blank field cant be submitted!", {
@@ -259,131 +263,146 @@ export default function CreateExam() {
   };
 
   return (
-    <div className={styles.flex}>
-      <SideBar role={role} />
-      <ToastContainer />
-      <form onSubmit={handleSubmit} className={styles.inner}>
-        {curIndex === 0 && (
-          <>
-            <h2>Create Exam</h2>
-            <label htmlFor="subject">Subject</label>
-            <input
-              type="text"
-              value={subject}
-              name="subject"
-              placeholder="Enter subject"
-              onChange={handleSubject}
-            />
-            <ErrorContainer error={error.subjectError} />
-          </>
-        )}
-
-        {question.length > 0 && (
-          <>
-            <label htmlFor="question">Question {curIndex + 1}</label>
-            <input
-              type="text"
-              name="question"
-              placeholder={`Enter question ${curIndex + 1}`}
-              value={question[curIndex].question}
-              onChange={handleQuesChange}
-            />
-            <ErrorContainer error={error.quesError} />
-
-            <label>Options</label>
-            {question[curIndex].options.map((opt, index) => (
-              <div key={index} className={styles.optionContainer}>
-                <input
-                  type="radio"
-                  name={`question-${curIndex}`}
-                  value={index}
-                  checked={question[curIndex].answer === index}
-                  onChange={() => handleRadio(index)}
-                />
+    <>
+      {loading ? (
+        <div className={styles.spinnerContainer}>
+          <LoadingSpinner />
+        </div>
+      ) : (
+        <div className={styles.flex}>
+          <SideBar role={role} />
+          <ToastContainer />
+          <form onSubmit={handleSubmit} className={styles.inner}>
+            {curIndex === 0 && (
+              <>
+                <h2>Create Exam</h2>
+                <label htmlFor="subject">Subject</label>
                 <input
                   type="text"
-                  name="option-text"
-                  value={opt}
-                  onChange={(e) => handleOptionChange(e, index)}
-                  placeholder={`Enter option ${index + 1}`}
+                  value={subject}
+                  name="subject"
+                  placeholder="Enter subject"
+                  onChange={handleSubject}
                 />
-              </div>
-            ))}
-            <ErrorContainer error={error.optionError} />
+                <ErrorContainer error={error.subjectError} />
+              </>
+            )}
 
-            <label>Answer</label>
-            <input
-              name="answer"
-              type="text"
-              value={
-                question[curIndex].answer !== null
-                  ? question[curIndex].options[question[curIndex].answer]
-                  : ""
-              }
-              placeholder="select Correct answer from above"
-              readOnly
-            />
-            <ErrorContainer error={error.answerError} />
-          </>
-        )}
+            {question.length > 0 && (
+              <>
+                <label htmlFor="question">Question {curIndex + 1}</label>
+                <input
+                  type="text"
+                  name="question"
+                  placeholder={`Enter question ${curIndex + 1}`}
+                  value={question[curIndex].question}
+                  onChange={handleQuesChange}
+                />
+                <ErrorContainer error={error.quesError} />
 
-        <div className={styles.btnContainer}>
-          <button
-            className={styles.btn}
-            onClick={handlePrevious}
-            disabled={curIndex === 0}
-            type="button"
-          >
-            Previous
-          </button>
-          <button
-            type="button"
-            className={styles.btn}
-            onClick={(e) => saveChanges(e)}
-          >
-            Save
-          </button>
-          {curIndex < 14 ? (
-            <>
-              <button type="button" className={styles.btn} onClick={handleNext}>
-                Next
+                <label>Options</label>
+                {question[curIndex].options.map((opt, index) => (
+                  <div key={index} className={styles.optionContainer}>
+                    <input
+                      type="radio"
+                      name={`question-${curIndex}`}
+                      value={index}
+                      checked={question[curIndex].answer === index}
+                      onChange={() => handleRadio(index)}
+                    />
+                    <input
+                      type="text"
+                      name="option-text"
+                      value={opt}
+                      onChange={(e) => handleOptionChange(e, index)}
+                      placeholder={`Enter option ${index + 1}`}
+                    />
+                  </div>
+                ))}
+                <ErrorContainer error={error.optionError} />
+
+                <label>Answer</label>
+                <input
+                  name="answer"
+                  type="text"
+                  value={
+                    question[curIndex].answer !== null
+                      ? question[curIndex].options[question[curIndex].answer]
+                      : ""
+                  }
+                  placeholder="select Correct answer from above"
+                  readOnly
+                />
+                <ErrorContainer error={error.answerError} />
+              </>
+            )}
+
+            <div className={styles.btnContainer}>
+              <button
+                className={styles.btn}
+                onClick={handlePrevious}
+                disabled={curIndex === 0}
+                type="button"
+              >
+                Previous
               </button>
-            </>
-          ) : (
-            <button type="submit" className={styles.btn}>
-              Submit
-            </button>
-          )}
-        </div>
-
-        {curIndex === 14 && (
-          <>
-            <label htmlFor="notes">Add notes</label>
-            {notes.map((element, index) => {
-              return (
-                <div key={index} className={styles.note}>
-                  <input
-                    type="text"
-                    name="notes"
-                    value={element}
-                    placeholder="Enter notes"
-                    onChange={(e) => handleNotes(e, index)}
-                  />
-                  <button type="button" onClick={() => deleteNote(index)}>
-                    X
+              <button
+                type="button"
+                className={styles.btn}
+                onClick={(e) => saveChanges(e)}
+              >
+                Save
+              </button>
+              {curIndex < 14 ? (
+                <>
+                  <button
+                    type="button"
+                    className={styles.btn}
+                    onClick={handleNext}
+                  >
+                    Next
                   </button>
-                </div>
-              );
-            })}
-            <ErrorContainer error={error.notesError} />
+                </>
+              ) : (
+                <button type="submit" className={styles.btn}>
+                  Submit
+                </button>
+              )}
+            </div>
 
-            <button type="button" onClick={(e, index) => addNotes(e, index)}>
-              Add Notes
-            </button>
-          </>
-        )}
-      </form>
-    </div>
+            {curIndex === 14 && (
+              <>
+                <label htmlFor="notes">Add notes</label>
+                {notes.map((element, index) => {
+                  return (
+                    <div key={index} className={styles.note}>
+                      <input
+                        type="text"
+                        name="notes"
+                        value={element}
+                        placeholder="Enter notes"
+                        onChange={(e) => handleNotes(e, index)}
+                      />
+                      <button type="button" onClick={() => deleteNote(index)}>
+                        X
+                      </button>
+                    </div>
+                  );
+                })}
+                <ErrorContainer error={error.notesError} />
+
+                <button
+                  type="button"
+                  onClick={(e, index) => addNotes(e, index)}
+                >
+                  Add Notes
+                </button>
+              </>
+            )}
+          </form>
+        </div>
+      )}
+    </>
   );
 }
 
