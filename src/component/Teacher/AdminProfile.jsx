@@ -15,7 +15,7 @@ export default function AdminProfile() {
     >
       <h2>Profile</h2>
       <p>Name: Admin</p>
-      <Link to="/reset-password">
+      <Link to="/teacher/reset-password">
         <button
           style={{
             backgroundColor: "#8E1616",

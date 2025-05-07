@@ -87,7 +87,7 @@ export default function Profile() {
             <Link to="/edit-profile" style={buttonStyle}>
               Edit Profile
             </Link>
-            <Link to="/reset-password" style={buttonStyle}>
+            <Link to="/student/reset-password" style={buttonStyle}>
               Change Password
             </Link>
           </div>

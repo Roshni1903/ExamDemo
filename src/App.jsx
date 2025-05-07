@@ -32,6 +32,7 @@ import AdminProfile from "./component/Teacher/AdminProfile";
 export default function App() {
   const location = useLocation();
   const hideNavbar = location.pathname === "/404";
+  const role = localStorage.getItem("role");
 
   return (
     <>
@@ -66,10 +67,10 @@ export default function App() {
           path="/forget-password-link"
           element={<ForgetPasswordUi desc={ForgetDesc} />}
         ></Route>
-        <Route
+        {/* <Route
           path="/reset-password"
           element={<ResetPasswordUi desc={resetPassDesc} />}
-        ></Route>
+        ></Route> */}
         <Route
           path="/newPassword"
           element={<NewPasswordUi desc={newPassDesc} />}
@@ -97,6 +98,10 @@ export default function App() {
           <Route path="/student/profile" element={<Profile />} />
           <Route path="/start-exam/:id" element={<StartExam />} />
           <Route path="/submit-review/:id" element={<SubmitReview />} />
+          <Route
+            path="/student/reset-password"
+            element={<ResetPasswordUi desc={resetPassDesc} />}
+          />
         </Route>
         <Route
           element={
@@ -111,6 +116,11 @@ export default function App() {
           <Route path="/edit-exam/:id" element={<EditExam />} />
           <Route path="/teacher/profile" element={<AdminProfile />} />
           <Route path="/students" element={<ShowStudentData />} />
+          <Route
+            path="/teacher/reset-password"
+            element={<ResetPasswordUi desc={resetPassDesc} />}
+          />
+
           <Route
             path="/view-student-detail/:id"
             element={<ViewStudentDetail />}
