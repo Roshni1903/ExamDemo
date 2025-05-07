@@ -107,7 +107,9 @@ export default function EditExam() {
   };
 
   const checkExisting = () => {
-    let include = false;
+    // let include = false;
+    let includeQues;
+    let includeAnswer;
     const quesValue = question[curIndex].question.toLowerCase();
     const optionValue = question[curIndex].options;
 
@@ -115,14 +117,14 @@ export default function EditExam() {
       (q, index) => index !== curIndex && q.question.toLowerCase() === quesValue
     );
     if (DuplicateQuestion) {
-      include = true;
+      includeQues = true;
     }
 
     if (new Set(optionValue).size !== optionValue.length) {
-      include = true;
+      includeAnswer = true;
     }
 
-    return include;
+    return [includeQues, includeAnswer];
   };
 
   const handleQuesChange = (e) => {
@@ -177,13 +179,10 @@ export default function EditExam() {
 
   const handlePrevious = () => {
     if (edit) {
-      toast.error(
-        "Please save changes before moving to the previous question.",
-        {
-          position: "top-center",
-          autoClose: 1000,
-        }
-      );
+      toast("Please save changes before moving to the previous question.", {
+        position: "top-center",
+        autoClose: 1000,
+      });
       return;
     }
     if (curIndex > 0) setCurIndex(curIndex - 1);
@@ -196,7 +195,7 @@ export default function EditExam() {
     if (Object.values(validationErrors).some((err) => err !== "")) return;
 
     if (edit) {
-      toast.error("Please save the changes before proceeding.", {
+      toast("Please save the changes before proceeding.", {
         position: "top-center",
         autoClose: 1000,
       });
@@ -211,9 +210,16 @@ export default function EditExam() {
 
     const validationErrors = validate("allfield");
     if (Object.values(validationErrors).some((err) => err !== "")) return;
-
-    if (checkExisting()) {
-      toast("Question already included or any of the options are same", {
+    let [includeQues, includeAnswer] = checkExisting();
+    if (includeQues) {
+      toast("Question already included!", {
+        autoClose: 1000,
+        position: "top-center",
+      });
+      return;
+    }
+    if (includeAnswer) {
+      toast("Options cant be same!", {
         autoClose: 1000,
         position: "top-center",
       });
@@ -234,7 +240,7 @@ export default function EditExam() {
     if (Object.values(validationErrors).some((err) => err !== "")) return;
 
     if (edit) {
-      toast.error("Please save changes before submitting.", {
+      toast("Please save changes before submitting.", {
         position: "top-center",
         autoClose: 1000,
       });
@@ -270,7 +276,7 @@ export default function EditExam() {
         navigate("/dashboard");
       }
     } catch (e) {
-      toast.error(
+      toast(
         "Any blank field can't be submitted and atleast one note is required!",
         {
           position: "top-center",
