@@ -336,10 +336,7 @@ export default function CreateExam() {
             position: "top-center",
             autoClose: 1000,
           });
-
-          setTimeout(() => {
-            navigate("/teacher/dashboard");
-          }, 500);
+          navigate("/teacher/dashboard");
           setLoading(false);
         }
       } catch (e) {
@@ -504,3 +501,4 @@ const ErrorContainer = ({ error }) => {
 };
 
 //dynamic form
+//elements ui changes map input type,radio in description map create and edit
