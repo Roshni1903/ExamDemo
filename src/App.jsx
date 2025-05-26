@@ -30,10 +30,12 @@ import ResetPasswordUi from "./Presentation/ResetPassword/ResetPasswordUi";
 import resetPassDesc from "./Description/resetPassDesc";
 import AdminProfile from "./component/Teacher/AdminProfile";
 import CreateEditExam from "./component/CreateEditExam";
+import CreateEdExam from "./component/CreateEdExam";
 export default function App() {
   const location = useLocation();
   const hideNavbar = location.pathname === "/404";
   const role = localStorage.getItem("role");
+  console.log(role)
 
   return (
     <>
@@ -68,6 +70,8 @@ export default function App() {
           path="/forget-password-link"
           element={<ForgetPasswordUi desc={ForgetDesc} />}
         ></Route>
+        <Route path="/createEd-exam" element={<CreateEdExam />} />
+
         {/* <Route
           path="/reset-password"
           element={<ResetPasswordUi desc={resetPassDesc} />}
